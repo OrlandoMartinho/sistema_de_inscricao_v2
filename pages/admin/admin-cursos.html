@@ -3,9 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Admin - Eventos</title>
+    <title>Admin - Cursos</title>
     <link rel="stylesheet" href="../../css/admin/eventos/eventos.css">
-
 </head>
 <body>
     <header style="background-image: url('../../img/background-home.jpg'); height: 150px;">
@@ -21,8 +20,8 @@
             <h3>Painel de Administração</h3>
             <div class="admin-menu">
                 <a href="admin-dashboard.html"><i>📊</i> Dashboard</a>
-                <a href="admin-eventos.html" class="active"><i>📅</i> Eventos</a>
-                <a href="admin-cursos.html" ><i>🎓</i> Cursos</a>
+                <a href="admin-eventos.html"><i>📅</i> Eventos</a>
+                <a href="admin-cursos.html" class="active"><i>🎓</i> Cursos</a>
                 <a href="admin-contactos.html"><i>✉️</i> Contactos</a>
                 <a href="admin-inscricoes.html"><i>📝</i> Inscrições</a>
                 <a href="admin-config.html"><i>⚙️</i> Configurações</a>
@@ -31,30 +30,32 @@
         
         <div class="admin-content">
             <div class="admin-header">
-                <h2>Gerenciar Eventos</h2>
+                <h2>Gerenciar Cursos</h2>
                 <button class="logout-btn" onclick="window.location.href='login.html'">Sair</button>
             </div>
             
             <div class="action-buttons">
-                <button class="add-btn" onclick="window.location.href='adicionar-evento.html'">+ Adicionar Evento</button>
-                <input type="text" class="search-box" placeholder="Pesquisar eventos...">
+                <button class="add-btn" onclick="window.location.href='adicionar-curso.html'">+ Adicionar Curso</button>
+                <input type="text" class="search-box" placeholder="Pesquisar cursos...">
             </div>
             
             <table>
                 <thead>
                     <tr>
-                        <th>Título</th>
-                        <th>Data</th>
-                        <th>Local</th>
+                        <th>Nome do Curso</th>
+                        <th>Duração</th>
+                        <th>Nível</th>
+                        <th>Instrutor</th>
                         <th>Status</th>
                         <th>Ações</th>
                     </tr>
                 </thead>
                 <tbody>
                     <tr>
-                        <td>Workshop de Programação</td>
-                        <td>15/10/2023</td>
-                        <td>Auditório Principal</td>
+                        <td>Introdução à Programação</td>
+                        <td>8 semanas</td>
+                        <td>Iniciante</td>
+                        <td>Prof. Silva</td>
                         <td>Ativo</td>
                         <td>
                             <button class="action-btn edit-btn" onclick="openEditModal(1)">Editar</button>
@@ -62,9 +63,10 @@
                         </td>
                     </tr>
                     <tr>
-                        <td>Feira de Emprego</td>
-                        <td>22/10/2023</td>
-                        <td>Pátio Central</td>
+                        <td>Desenvolvimento Web Avançado</td>
+                        <td>12 semanas</td>
+                        <td>Avançado</td>
+                        <td>Prof. Oliveira</td>
                         <td>Ativo</td>
                         <td>
                             <button class="action-btn edit-btn" onclick="openEditModal(2)">Editar</button>
@@ -72,9 +74,10 @@
                         </td>
                     </tr>
                     <tr>
-                        <td>Palestra sobre IA</td>
-                        <td>05/11/2023</td>
-                        <td>Sala 203</td>
+                        <td>Data Science Fundamentals</td>
+                        <td>10 semanas</td>
+                        <td>Intermediário</td>
+                        <td>Prof. Costa</td>
                         <td>Inativo</td>
                         <td>
                             <button class="action-btn edit-btn" onclick="openEditModal(3)">Editar</button>
@@ -90,29 +93,37 @@
     <div id="editModal" class="modal">
         <div class="modal-content">
             <div class="modal-header">
-                <h3>Editar Evento</h3>
+                <h3>Editar Curso</h3>
                 <span class="close-btn" onclick="closeModal('editModal')">&times;</span>
             </div>
             <div class="modal-body">
                 <div class="form-group">
-                    <label for="edit-title">Título</label>
-                    <input type="text" id="edit-title" value="Workshop de Programação">
-                </div>
-                <div class="form-group">
-                    <label for="edit-date">Data</label>
-                    <input type="date" id="edit-date" value="2023-10-15">
-                </div>
-                <div class="form-group">
-                    <label for="edit-time">Hora</label>
-                    <input type="time" id="edit-time" value="14:00">
-                </div>
-                <div class="form-group">
-                    <label for="edit-location">Local</label>
-                    <input type="text" id="edit-location" value="Auditório Principal">
+                    <label for="edit-title">Nome do Curso</label>
+                    <input type="text" id="edit-title" value="Introdução à Programação">
                 </div>
                 <div class="form-group">
                     <label for="edit-description">Descrição</label>
-                    <textarea id="edit-description">Um workshop prático sobre programação web com HTML, CSS e JavaScript.</textarea>
+                    <textarea id="edit-description">Curso introdutório sobre lógica de programação e algoritmos.</textarea>
+                </div>
+                <div class="form-group">
+                    <label for="edit-duration">Duração</label>
+                    <input type="text" id="edit-duration" value="8 semanas">
+                </div>
+                <div class="form-group">
+                    <label for="edit-level">Nível</label>
+                    <select id="edit-level">
+                        <option value="beginner">Iniciante</option>
+                        <option value="intermediate">Intermediário</option>
+                        <option value="advanced">Avançado</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="edit-instructor">Instrutor</label>
+                    <input type="text" id="edit-instructor" value="Prof. Silva">
+                </div>
+                <div class="form-group">
+                    <label for="edit-price">Preço (€)</label>
+                    <input type="number" id="edit-price" value="199">
                 </div>
                 <div class="form-group">
                     <label for="edit-status">Status</label>
@@ -124,7 +135,7 @@
             </div>
             <div class="modal-footer">
                 <button class="btn btn-secondary" onclick="closeModal('editModal')">Cancelar</button>
-                <button class="btn btn-primary" onclick="saveEvent()">Salvar Alterações</button>
+                <button class="btn btn-primary" onclick="saveCourse()">Salvar Alterações</button>
             </div>
         </div>
     </div>
@@ -137,11 +148,11 @@
                 <span class="close-btn" onclick="closeModal('deleteModal')">&times;</span>
             </div>
             <div class="modal-body">
-                <p>Tem certeza que deseja excluir este evento? Esta ação não pode ser desfeita.</p>
+                <p>Tem certeza que deseja excluir este curso? Esta ação não pode ser desfeita.</p>
             </div>
             <div class="modal-footer">
                 <button class="btn btn-secondary" onclick="closeModal('deleteModal')">Cancelar</button>
-                <button class="btn btn-danger" onclick="deleteEvent()">Excluir</button>
+                <button class="btn btn-danger" onclick="deleteCourse()">Excluir</button>
             </div>
         </div>
     </div>
@@ -154,7 +165,7 @@
                 <span class="close-btn" onclick="closeModal('confirmModal')">&times;</span>
             </div>
             <div class="modal-body">
-                <p id="confirmMessage">Evento atualizado com sucesso!</p>
+                <p id="confirmMessage">Curso atualizado com sucesso!</p>
             </div>
             <div class="modal-footer">
                 <button class="btn btn-primary" onclick="closeModal('confirmModal')">OK</button>
@@ -163,5 +174,5 @@
     </div>
  
 </body>
-<script src="../../js/eventos/eventos.js"></script>
+<script src="../../js/cursos/cursos.js"></script>
 </html>
