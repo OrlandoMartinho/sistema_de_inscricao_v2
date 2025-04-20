@@ -86,3 +86,51 @@
             }
         }
     }
+
+     // Funções para manipulação dos modais
+     function openAddModal() {
+        document.getElementById('addModal').style.display = 'block';
+    }
+    
+    function openEditModal(id) {
+        // Aqui você pode carregar os dados do evento com o ID especificado
+        document.getElementById('editModal').style.display = 'block';
+    }
+    
+    function openDeleteModal(id) {
+        document.getElementById('deleteModal').style.display = 'block';
+    }
+    
+    function closeModal(modalId) {
+        document.getElementById(modalId).style.display = 'none';
+    }
+    
+    function addEvent() {
+        // Lógica para adicionar o evento
+        // ...
+        
+        // Mostra mensagem de confirmação
+        document.getElementById('confirmMessage').textContent = 'Evento cadastrado com sucesso!';
+        closeModal('addModal');
+        openModal('confirmModal');
+    }
+    
+    function saveEvent() {
+        // Lógica para salvar as alterações
+        // ...
+        
+        // Mostra mensagem de confirmação
+        document.getElementById('confirmMessage').textContent = 'Evento atualizado com sucesso!';
+        closeModal('editModal');
+        openModal('confirmModal');
+    }
+    
+    function deleteEvent() {
+        // Lógica para excluir o evento
+        // ...
+        
+        // Mostra mensagem de confirmação
+        document.getElementById('confirmMessage').textContent = 'Evento excluído com sucesso!';
+        closeModal('deleteModal');
+        openModal('confirmModal');
+    }
