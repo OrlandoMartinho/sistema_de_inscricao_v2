@@ -1,4 +1,6 @@
 /* Estilos gerais (mantidos do anterior) */
+
+@import url('modais.css');
 * {
     margin: 0;
     padding: 0;
