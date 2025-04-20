@@ -172,6 +172,7 @@
         });
     }
 
+
     // Adicionar event listeners aos botões dinâmicos
     function addEventListeners() {
         document.querySelectorAll('.view-btn').forEach(btn => {
