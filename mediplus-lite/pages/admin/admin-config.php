@@ -1,0 +1,114 @@
+<?php
+
+ Session_start();
+
+?>
+
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin - Configurações</title>
+    <link rel="stylesheet" href="../css1/admin/config.css"> 
+  
+</head>
+<body>
+    <header style="background-image: url('../../img/ac.jpg'); height: 150px;">
+        <div class="container">
+            <nav>
+                <a href="../index.html" class="logo">IP30SET</a>
+            </nav>
+        </div>
+    </header>
+
+    <div class="admin-container">
+        <div class="admin-sidebar">
+            <h3>Painel de Administração</h3>
+            <div class="admin-menu">
+                <a href="admin-dashboard.html"><i>📊</i> Dashboard</a>
+                <a href="admin-eventos.html"><i>📅</i> Eventos</a>
+                <a href="admin-cursos.html" ><i>🎓</i> Cursos</a>
+                <a href="admin-contactos.html"><i>✉️</i> Contactos</a>
+                <a href="admin-inscricoes.html"><i>📝</i> Inscrições</a>
+                <a href="admin-config.html" class="active"><i>⚙️</i> Configurações</a>
+            </div>
+        </div>
+        
+        <div class="admin-content">
+            <div class="admin-header">
+                <h2>Configurações do Sistema</h2>
+                <button class="logout-btn" onclick="window.location.href='login.html'">Sair</button>
+            </div>
+            
+            <div class="settings-tabs">
+                
+                <button class="tab-btn" onclick="openTab(event, 'email-settings')">Config. de Segurança</button>
+              
+            </div>
+        
+            <div id="email-settings" class="tab-content">
+                <div class="settings-form">
+                    <h3>Alterar Credenciais de Email</h3>
+                    <form action="admin-config/receber-credencias.php" method="post">
+
+                    <?php 
+                        if(isset($_SESSION['msg'])){
+                            echo ($_SESSION['msg']);
+                            unset($_SESSION['msg']);
+                        }
+
+                    ?>        
+
+
+                        <div class="form-group">
+                            <label for="smtp-user">Email de Acesso</label>
+                            <input type="email" id="smtp-user" value=" <?php echo 'admin@gmail.com' ?>">
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="current-pass">Senha Atual</label>
+                            <input type="password" id="senha_actual" placeholder="Digite sua senha atual">
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="smtp-pass">Nova Senha</label>
+                            <input type="password" id="senha_nova" placeholder="Digite a nova senha">
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="confirm-pass">Confirmar Nova Senha</label>
+                            <input type="password" id="confirmar_senha" placeholder="Confirme a nova senha">
+                        </div>
+                        
+                        <div class="form-actions">
+                            <button type="submit" class="save-btn">Atualizar Credenciais</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+          
+        </div>
+    </div>
+
+    <script>
+        function openTab(evt, tabName) {
+            // Esconde todos os conteúdos de tab
+            var tabcontents = document.getElementsByClassName("tab-content");
+            for (var i = 0; i < tabcontents.length; i++) {
+                tabcontents[i].classList.remove("active");
+            }
+            
+            // Remove a classe active de todos os botões
+            var tabbuttons = document.getElementsByClassName("tab-btn");
+            for (var i = 0; i < tabbuttons.length; i++) {
+                tabbuttons[i].classList.remove("active");
+            }
+            
+            // Mostra a tab atual e adiciona a classe active ao botão
+            document.getElementById(tabName).classList.add("active");
+            evt.currentTarget.classList.add("active");
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin - Inscrições</title>
+    <link rel="stylesheet" href="../css1/admin/inscricoes/inscricoes.css">
+</head>
+<body>
+    <header style="background-image: url('../../img/ac.jpg'); height: 150px;">
+        <div class="container">
+            <nav>
+                <a href="../index.html" class="logo">IP30SET</a>
+            </nav>
+        </div>
+    </header>
+
+    <div class="admin-container">
+        <div class="admin-sidebar">
+            <h3>Painel de Administração</h3>
+            <div class="admin-menu">
+                <a href="admin-dashboard.html"><i>📊</i> Dashboard</a>
+                <a href="admin-eventos.html"><i>📅</i> Eventos</a>
+                <a href="admin-cursos.html" ><i>🎓</i> Cursos</a>
+                <a href="admin-contactos.html"><i>✉️</i> Contactos</a>
+                <a href="admin-inscricoes.html" class="active"><i>📝</i> Inscrições</a>
+                <a href="admin-config.php"><i>⚙️</i> Configurações</a>
+            </div>
+        </div>
+        
+        <div class="admin-content">
+            <div class="admin-header">
+                <h2>Inscrições de Candidatura</h2>
+                <button class="logout-btn" onclick="window.location.href='login.html'">Sair</button>
+            </div>
+            
+            <div class="action-buttons">
+                <div class="filter-options">
+                    <select class="filter-select">
+                        <option>Todos os cursos</option>
+                        <option>Informática</option>
+                        <option>Gestão</option>
+                        <option>Engenharia</option>
+                    </select>
+                    <select class="filter-select">
+                        <option>Todos os status</option>
+                        <option>Pendente</option>
+                        <option>Aprovado</option>
+                        <option>Rejeitado</option>
+                    </select>
+                </div>
+                <button class="export-btn">Exportar Dados</button>
+            </div>
+            
+            <table>
+                <thead>
+                    <tr>
+                        <th>Nº</th>
+                        <th>Nome</th>
+                        <th>Curso</th>
+                        <th>Data</th>
+                        <th>Status</th>
+                        <th>Ações</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>2023001</td>
+                        <td>Ana Pereira</td>
+                        <td>Informática</td>
+                        <td>05/10/2023</td>
+                        <td><span class="status-badge status-pendente">Pendente</span></td>
+                        <td>
+                            <button class="action-btn view-btn" onclick="openViewModal(2023001)">Ver</button>
+                            <button class="action-btn edit-btn" onclick="openEditModal(2023001)">Editar</button>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>2023002</td>
+                        <td>Pedro Mendes</td>
+                        <td>Gestão</td>
+                        <td>07/10/2023</td>
+                        <td><span class="status-badge status-respondido">Aprovado</span></td>
+                        <td>
+                            <button class="action-btn view-btn" onclick="openViewModal(2023002)">Ver</button>
+                            <button class="action-btn edit-btn" onclick="openEditModal(2023002)">Editar</button>
+                        </td> 
+                        ~
+                        
+                    </tr>
+                    <tr>
+                        <td>2023003</td>
+                        <td>Luís Fernandes</td>
+                        <td>Engenharia</td>
+                        <td>10/10/2023</td>
+                        <td><span class="status-badge" style="background:#e74c3c">Rejeitado</span></td>
+                        <td>
+                            <button class="action-btn view-btn" onclick="openViewModal(2023003)">Ver</button>
+                            <button class="action-btn edit-btn" onclick="openEditModal(2023003)">Editar</button>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Modal de Visualização -->
+    <div id="viewModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Detalhes da Inscrição</h3>
+                <span class="close-btn" onclick="closeModal('viewModal')">&times;</span>
+            </div>
+            <div class="modal-body">
+                <div class="inscricao-details">
+                    <div class="detail-row">
+                        <span class="detail-label">Nº Inscrição:</span>
+                        <span class="detail-value" id="view-id">2023001</span>
+                    </div>
+                    <div class="detail-row">
+                        <span class="detail-label">Nome:</span>
+                        <span class="detail-value" id="view-nome">Ana Pereira</span>
+                    </div>
+                    <div class="detail-row">
+                        <span class="detail-label">Curso:</span>
+                        <span class="detail-value" id="view-curso">Informática</span>
+                    </div>
+                    <div class="detail-row">
+                        <span class="detail-label">Data:</span>
+                        <span class="detail-value" id="view-data">05/10/2023</span>
+                    </div>
+                    <div class="detail-row">
+                        <span class="detail-label">Status:</span>
+                        <span class="detail-value"><span id="view-status" class="status-badge status-pendente">Pendente</span></span>
+                    </div>
+                    <div class="detail-row">
+                        <span class="detail-label">Documentos:</span>
+                        <div class="documents-list">
+                            <a href="#" class="document-link">BI.pdf</a>
+                            <a href="#" class="document-link">Certificado.pdf</a>
+                            <a href="#" class="document-link">Foto.jpg</a>
+                        </div>
+                    </div>
+                    <div class="detail-row full-width">
+                        <span class="detail-label">Observações:</span>
+                        <p class="detail-value" id="view-observacoes">Nenhuma observação registada.</p>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-primary" onclick="closeModal('viewModal')">Fechar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal de Edição -->
+    <div id="editModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Editar Inscrição</h3>
+                <span class="close-btn" onclick="closeModal('editModal')">&times;</span>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label for="edit-id">Nº Inscrição</label>
+                    <input type="text" id="edit-id" value="2023001" readonly>
+                </div>
+                <div class="form-group">
+                    <label for="edit-nome">Nome</label>
+                    <input type="text" id="edit-nome" value="Ana Pereira">
+                </div>
+                <div class="form-group">
+                    <label for="edit-curso">Curso</label>
+                    <select id="edit-curso">
+                        <option>Informática</option>
+                        <option>Gestão</option>
+                        <option>Engenharia</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="edit-data">Data</label>
+                    <input type="date" id="edit-data" value="2023-10-05">
+                </div>
+                <div class="form-group">
+                    <label for="edit-status">Status</label>
+                    <select id="edit-status">
+                        <option value="pendente">Pendente</option>
+                        <option value="aprovado">Aprovado</option>
+                        <option value="rejeitado">Rejeitado</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="edit-observacoes">Observações</label>
+                    <textarea id="edit-observacoes" rows="3">Nenhuma observação registada.</textarea>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" onclick="closeModal('editModal')">Cancelar</button>
+                <button class="btn btn-primary" onclick="saveInscricao()">Salvar Alterações</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal de Confirmação -->
+    <div id="confirmModal" class="modal confirm-modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Operação Concluída</h3>
+                <span class="close-btn" onclick="closeModal('confirmModal')">&times;</span>
+            </div>
+            <div class="modal-body">
+                <p id="confirmMessage">Alterações salvas com sucesso!</p>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-primary" onclick="closeModal('confirmModal')">OK</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal de Exportação -->
+    <div id="exportModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Exportar Dados</h3>
+                <span class="close-btn" onclick="closeModal('exportModal')">&times;</span>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label>Formato</label>
+                    <div class="radio-group">
+                        <label><input type="radio" name="export-format" value="excel" checked> Excel</label>
+                        <label><input type="radio" name="export-format" value="csv"> CSV</label>
+                        <label><input type="radio" name="export-format" value="pdf"> PDF</label>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>Filtros Atuais</label>
+                    <div class="export-filters">
+                        <p>Curso: <span id="export-curso-filter">Todos</span></p>
+                        <p>Status: <span id="export-status-filter">Todos</span></p>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" onclick="closeModal('exportModal')">Cancelar</button>
+                <button class="btn btn-primary" onclick="exportData()">Exportar</button>
+            </div>
+        </div>
+    </div>
+
+</body>
+<script src="../js/inscricoes/inscricoes.js"></script>
+</html>
