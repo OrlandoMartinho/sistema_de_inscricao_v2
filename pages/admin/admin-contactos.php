@@ -1,8 +1,8 @@
 <?php
 session_start();
 
-include './config/connection.php';
-include './services/contactos-services.php';
+include('../../config/connection.php');
+include '../../services/contactos-services.php';
 
 ?>
 <!DOCTYPE html>

@@ -7,8 +7,8 @@ if (!isset($_SESSION['loggedin']) || $_SESSION['loggedin'] !== true) {
     exit;
 }
 
-include './config/connection.php';
-include './services/dashboard-services.php';
+include('../../config/connection.php');
+include '../../services/dashboard-services.php';
 
 ?>
 <!DOCTYPE html>

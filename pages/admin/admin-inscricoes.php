@@ -6,8 +6,8 @@ if (!isset($_SESSION['admin_logged_in'])) {
     exit();
 }
 
-include './config/connection.php';
-include './services/inscricoes-services.php';
+include('../../config/connection.php');
+include '../../services/inscricoes-services.php';
 
 ?>
 

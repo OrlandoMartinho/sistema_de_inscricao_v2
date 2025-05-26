@@ -1,8 +1,8 @@
 <?php
 session_start();
 
-// Se o usuário já estiver logado, redireciona para o painel
-include 'connection.php';
+include('../../config/connection.php');
+
 
 // Processar o formulário de login
 if ($_SERVER['REQUEST_METHOD'] == 'POST') {
