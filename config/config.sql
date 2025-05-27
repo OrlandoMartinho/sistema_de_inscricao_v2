@@ -85,3 +85,6 @@ CREATE TABLE IF NOT EXISTS atividades (
     usuario VARCHAR(100) NOT NULL,
     data_acao DATETIME NOT NULL
 );
+
+
+ALTER TABLE `inscricoes` ADD `observacoes` VARCHAR(255) NOT NULL AFTER `status`;

@@ -1,13 +1,20 @@
 <?php
 // Iniciar sessão e verificar autenticação
 session_start();
-if (!isset($_SESSION['loggedin']) ){
+if (!isset($_SESSION['loggedin'])) {
     header("Location: login.php");
     exit;
 }
 
 include('../../config/connection.php');
-include '../../services/inscricoes-services.php';
+
+// Diretório para upload de documentos
+$upload_dir = '../../uploads/inscricoes/';
+
+// Criar diretório se não existir
+if (!file_exists($upload_dir)) {
+    mkdir($upload_dir, 0777, true);
+}
 
 // Obter cursos para filtro
 $cursos_query = "SELECT id, nome FROM cursos";
@@ -21,28 +28,117 @@ while ($row = $cursos_result->fetch_assoc()) {
 $curso_filter = isset($_GET['curso']) ? intval($_GET['curso']) : null;
 $status_filter = isset($_GET['status']) ? $_GET['status'] : null;
 
-// Obter inscrições com filtros
-$result = getInscricoes($conn, $curso_filter, $status_filter);
+// Construir consulta SQL com filtros
+$sql = "SELECT i.id, i.nome_completo, i.email, i.telefone, i.bi_numero, i.sexo, 
+               i.data_inscricao, i.status, i.observacoes, c.nome as curso_nome
+        FROM inscricoes i
+        JOIN cursos c ON i.curso_id = c.id
+        WHERE 1=1";
 
-// Processar ação de atualização de status
-if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['update_status'])) {
-    $id = intval($_POST['id']);
-    $status = $_POST['status'];
-    $observacoes = $_POST['observacoes'];
+$params = [];
+$types = '';
+
+if ($curso_filter) {
+    $sql .= " AND i.curso_id = ?";
+    $params[] = $curso_filter;
+    $types .= 'i';
+}
+
+if ($status_filter) {
+    $sql .= " AND i.status = ?";
+    $params[] = $status_filter;
+    $types .= 's';
+}
+
+$sql .= " ORDER BY i.data_inscricao DESC";
+
+// Preparar e executar a consulta
+$stmt = $conn->prepare($sql);
+if ($params) {
+    $stmt->bind_param($types, ...$params);
+}
+$stmt->execute();
+$result = $stmt->get_result();
+$inscricoes = $result->fetch_all(MYSQLI_ASSOC);
+$stmt->close();
+
+// Processar ações
+if ($_SERVER['REQUEST_METHOD'] == 'POST') {
+    $id = intval($_POST['id'] ?? 0);
     
-    if (updateInscricaoStatus($conn, $id, $status, $observacoes)) {
-        $_SESSION['success_message'] = "Status da inscrição atualizado com sucesso!";
-    } else {
-        $_SESSION['error_message'] = "Erro ao atualizar status da inscrição";
+    if (isset($_POST['aprovar'])) {
+        $status = 'aprovado';
+        $observacoes = 'Inscrição aprovada pelo administrador';
+    } elseif (isset($_POST['rejeitar'])) {
+        $status = 'rejeitado';
+        $observacoes = 'Inscrição rejeitada pelo administrador';
+    } elseif (isset($_POST['update_status'])) {
+        $status = $_POST['status'];
+        $observacoes = $_POST['observacoes'] ?? '';
     }
     
-    header("Location: admin-inscricoes.php");
+    if (isset($status)) {
+        $sql = "UPDATE inscricoes SET status = ?, observacoes = ? WHERE id = ?";
+        $stmt = $conn->prepare($sql);
+        $stmt->bind_param("ssi", $status, $observacoes, $id);
+        
+        if ($stmt->execute()) {
+            $_SESSION['success_message'] = "Status da inscrição atualizado com sucesso!";
+        } else {
+            $_SESSION['error_message'] = "Erro ao atualizar status da inscrição: " . $conn->error;
+        }
+        $stmt->close();
+        
+        header("Location: admin-inscricoes.php");
+        exit();
+    }
+}
+
+// Processar exportação para CSV
+if (isset($_GET['export'])) {
+    header('Content-Type: text/csv; charset=utf-8');
+    header('Content-Disposition: attachment; filename=inscricoes_' . date('Y-m-d') . '.csv');
+    
+    $output = fopen('php://output', 'w');
+    
+    // Cabeçalho do CSV
+    fputcsv($output, [
+        'ID', 'Nome', 'Email', 'Telefone', 'BI', 'Sexo', 
+        'Curso', 'Data Inscrição', 'Status', 'Observações'
+    ]);
+    
+    // Dados
+    foreach ($inscricoes as $inscricao) {
+        fputcsv($output, [
+            $inscricao['id'],
+            $inscricao['nome_completo'],
+            $inscricao['email'],
+            $inscricao['telefone'],
+            $inscricao['bi_numero'],
+            $inscricao['sexo'],
+            $inscricao['curso_nome'],
+            date('d/m/Y H:i', strtotime($inscricao['data_inscricao'])),
+            $inscricao['status'],
+            $inscricao['observacoes']
+        ]);
+    }
+    
+    fclose($output);
     exit();
 }
 
-// Processar exportação de dados para CSV
-if (isset($_GET['export'])) {
-    exportInscricoesToCSV($conn, $curso_filter, $status_filter);
+// Verificar se há edição de inscrição
+$inscricao_edicao = null;
+if (isset($_GET['edit'])) {
+    $id = intval($_GET['edit']);
+    $sql = "SELECT id, nome_completo, curso_id, DATE(data_inscricao) as data, 
+                   status, observacoes FROM inscricoes WHERE id = ?";
+    $stmt = $conn->prepare($sql);
+    $stmt->bind_param("i", $id);
+    $stmt->execute();
+    $result = $stmt->get_result();
+    $inscricao_edicao = $result->fetch_assoc();
+    $stmt->close();
 }
 ?>
 
@@ -52,107 +148,10 @@ if (isset($_GET['export'])) {
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Admin - Inscrições</title>
-    <link rel="stylesheet" href="../css1/admin/inscricoes/inscricoes.css">
-    <style>
-        /* Estilos dos modais movidos para aqui para evitar o erro 404 */
-        .modal {
-            display: none;
-            position: fixed;
-            z-index: 1000;
-            left: 0;
-            top: 0;
-            width: 100%;
-            height: 100%;
-            overflow: auto;
-            background-color: rgba(0,0,0,0.4);
-        }
-        
-        .modal-content {
-            background-color: #fefefe;
-            margin: 5% auto;
-            padding: 20px;
-            border: 1px solid #888;
-            width: 80%;
-            max-width: 800px;
-            border-radius: 5px;
-            box-shadow: 0 4px 8px 0 rgba(0,0,0,0.2);
-        }
-        
-        .modal-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            border-bottom: 1px solid #ddd;
-            padding-bottom: 10px;
-            margin-bottom: 15px;
-        }
-        
-        .close-btn {
-            color: #aaa;
-            font-size: 28px;
-            font-weight: bold;
-            cursor: pointer;
-        }
-        
-        .close-btn:hover {
-            color: black;
-        }
-        
-        .status-badge {
-            padding: 3px 8px;
-            border-radius: 3px;
-            font-size: 12px;
-            font-weight: bold;
-            text-transform: capitalize;
-        }
-        
-        .status-pendente {
-            background-color: #fff3cd;
-            color: #856404;
-        }
-        
-        .status-aprovado {
-            background-color: #d4edda;
-            color: #155724;
-        }
-        
-        .status-rejeitado {
-            background-color: #f8d7da;
-            color: #721c24;
-        }
-        
-        /* Estilos do dropdown de exportação */
-        .export-dropdown {
-            position: relative;
-            display: inline-block;
-        }
-        
-        .dropdown-content {
-            display: none;
-            position: absolute;
-            background-color: #f9f9f9;
-            min-width: 160px;
-            box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
-            z-index: 1;
-            right: 0;
-        }
-        
-        .dropdown-content a {
-            color: black;
-            padding: 12px 16px;
-            text-decoration: none;
-            display: block;
-        }
-        
-        .dropdown-content a:hover {
-            background-color: #f1f1f1;
-        }
-        
-        .show {
-            display: block;
-        }
-    </style>
-    <!-- Adicionando bibliotecas para exportação PDF -->
+    <link rel="stylesheet" href="../css/bootstrap.min.css">
+       <link rel="stylesheet" href="../css1/admin/inscricoes/inscricoes.css">
+       <link rel="stylesheet" href="../css1/modaiscss2.css">
+    <!-- Bibliotecas para exportação PDF -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.25/jspdf.plugin.autotable.min.js"></script>
 </head>
@@ -160,64 +159,68 @@ if (isset($_GET['export'])) {
     <header style="background-image: url('../../img/ac.jpg'); height: 150px;">
         <div class="container">
             <nav>
-                <a href="../index.html" class="logo">IP30SET</a>
+                <a href="../index.php" class="logo">IP30SET</a>
             </nav>
         </div>
     </header>
 
     <div class="admin-container">
         <div class="admin-sidebar">
-            <h3>Painel de Administração</h3>
+            <h3 class="text-center">Painel de Administração</h3>
             <div class="admin-menu">
-                <a href="admin-dashboard.php"><i>📊</i> Dashboard</a>
-                <a href="admin-eventos.php"><i>📅</i> Eventos</a>
-                <a href="admin-cursos.php"><i>🎓</i> Cursos</a>
-                <a href="admin-contactos.php"><i>✉️</i> Contactos</a>
-                <a href="admin-inscricoes.php" class="active"><i>📝</i> Inscrições</a>
-                <a href="admin-config.php"><i>⚙️</i> Configurações</a>
+                <a href="admin-dashboard.php" class="d-block p-3"><i>📊</i> Dashboard</a>
+                <a href="admin-eventos.php" class="d-block p-3"><i>📅</i> Eventos</a>
+                <a href="admin-cursos.php" class="d-block p-3"><i>🎓</i> Cursos</a>
+                <a href="admin-contactos.php" class="d-block p-3"><i>✉️</i> Contactos</a>
+                <a href="admin-inscricoes.php" class="d-block p-3 active"><i>📝</i> Inscrições</a>
+                <a href="admin-config.php" class="d-block p-3"><i>⚙️</i> Configurações</a>
             </div>
         </div>
         
         <div class="admin-content">
             <div class="admin-header">
                 <h2>Inscrições de Candidatura</h2>
-                <div class="export-dropdown">
-                    <button class="export-btn" onclick="toggleExportDropdown()">Exportar Dados ▼</button>
-                    <div id="exportDropdown" class="dropdown-content">
-                        <a href="#" onclick="exportData('all', 'csv')">CSV - Todas</a>
-                        <a href="#" onclick="exportData('aprovado', 'csv')">CSV - Aprovadas</a>
-                        <a href="#" onclick="exportData('pendente', 'csv')">CSV - Pendentes</a>
-                        <a href="#" onclick="exportData('rejeitado', 'csv')">CSV - Rejeitadas</a>
-                        <a href="#" onclick="exportData('all', 'pdf')">PDF - Todas</a>
-                        <a href="#" onclick="exportData('aprovado', 'pdf')">PDF - Aprovadas</a>
-                        <a href="#" onclick="exportData('pendente', 'pdf')">PDF - Pendentes</a>
-                        <a href="#" onclick="exportData('rejeitado', 'pdf')">PDF - Rejeitadas</a>
+                <div>
+                    <div class="export-dropdown">
+                        <button class="btn btn-primary" onclick="toggleExportDropdown()">Exportar Dados ▼</button>
+                        <div id="exportDropdown" class="dropdown-content">
+                            <a href="#" onclick="exportData('all', 'csv')">CSV - Todas</a>
+                            <a href="#" onclick="exportData('aprovado', 'csv')">CSV - Aprovadas</a>
+                            <a href="#" onclick="exportData('pendente', 'csv')">CSV - Pendentes</a>
+                            <a href="#" onclick="exportData('rejeitado', 'csv')">CSV - Rejeitadas</a>
+                            <a href="#" onclick="exportData('all', 'pdf')">PDF - Todas</a>
+                            <a href="#" onclick="exportData('aprovado', 'pdf')">PDF - Aprovadas</a>
+                            <a href="#" onclick="exportData('pendente', 'pdf')">PDF - Pendentes</a>
+                            <a href="#" onclick="exportData('rejeitado', 'pdf')">PDF - Rejeitadas</a>
+                        </div>
                     </div>
+                    <button class="btn btn-secondary ml-2" onclick="window.location.href='logout.php'">Sair</button>
                 </div>
-                <button class="logout-btn" onclick="window.location.href='logout.php'">Sair</button>
             </div>
             
             <!-- Mensagens de sucesso/erro -->
             <?php if (isset($_SESSION['success_message'])): ?>
-                <div class="alert alert-success" style="background: #d4edda; color: #155724; padding: 10px; margin-bottom: 15px; border-radius: 4px;">
+                <div class="alert alert-success">
                     <?php echo $_SESSION['success_message']; ?>
                     <?php unset($_SESSION['success_message']); ?>
                 </div>
             <?php endif; ?>
             
             <?php if (isset($_SESSION['error_message'])): ?>
-                <div class="alert alert-error" style="background: #f8d7da; color: #721c24; padding: 10px; margin-bottom: 15px; border-radius: 4px;">
+                <div class="alert alert-danger">
                     <?php echo $_SESSION['error_message']; ?>
                     <?php unset($_SESSION['error_message']); ?>
                 </div>
             <?php endif; ?>
             
-            <div class="action-buttons">
-                <form method="get" action="admin-inscricoes.php" class="filter-options">
+            <div class="filter-options">
+                <form method="get" action="admin-inscricoes.php" class="d-flex gap-3">
                     <select name="curso" class="filter-select" onchange="this.form.submit()">
                         <option value="">Todos os cursos</option>
                         <?php foreach ($cursos as $id => $nome): ?>
-                            <option value="<?php echo $id; ?>" <?php echo ($curso_filter == $id) ? 'selected' : ''; ?>><?php echo htmlspecialchars($nome); ?></option>
+                            <option value="<?php echo $id; ?>" <?php echo ($curso_filter == $id) ? 'selected' : ''; ?>>
+                                <?php echo htmlspecialchars($nome); ?>
+                            </option>
                         <?php endforeach; ?>
                     </select>
                     <select name="status" class="filter-select" onchange="this.form.submit()">
@@ -229,64 +232,81 @@ if (isset($_GET['export'])) {
                 </form>
             </div>
             
-            <table id="inscricoesTable">
-                <thead>
-                    <tr>
-                        <th>Nº</th>
-                        <th>Nome</th>
-                        <th>Curso</th>
-                        <th>Data</th>
-                        <th>Status</th>
-                        <th>Ações</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <?php if ($result->num_rows > 0): ?>
-                        <?php while ($row = $result->fetch_assoc()): ?>
-                            <tr>
-                                <td><?php echo $row['id']; ?></td>
-                                <td><?php echo htmlspecialchars($row['nome_completo']); ?></td>
-                                <td><?php echo htmlspecialchars($row['curso_nome']); ?></td>
-                                <td><?php echo date('d/m/Y', strtotime($row['data_inscricao'])); ?></td>
-                                <td>
-                                    <span class="status-badge status-<?php echo $row['status']; ?>">
-                                        <?php 
-                                        echo ucfirst($row['status']);
-                                        ?>
-                                    </span>
-                                </td>
-                                <td>
-                                    <button class="action-btn view-btn" onclick="openViewModal(
-                                        <?php echo $row['id']; ?>,
-                                        '<?php echo htmlspecialchars($row['nome_completo'], ENT_QUOTES); ?>',
-                                        '<?php echo htmlspecialchars($row['curso_nome'], ENT_QUOTES); ?>',
-                                        '<?php echo date('d/m/Y', strtotime($row['data_inscricao'])); ?>',
-                                        '<?php echo $row['status']; ?>',
-                                        '<?php echo htmlspecialchars($row['email'], ENT_QUOTES); ?>',
-                                        '<?php echo htmlspecialchars($row['telefone'], ENT_QUOTES); ?>',
-                                        '<?php echo htmlspecialchars($row['bi_numero'], ENT_QUOTES); ?>',
-                                        '<?php echo htmlspecialchars($row['sexo'], ENT_QUOTES); ?>'
-                                    )">Ver</button>
-                                    <button class="action-btn edit-btn" onclick="openEditModal(
-                                        <?php echo $row['id']; ?>,
-                                        '<?php echo htmlspecialchars($row['nome_completo'], ENT_QUOTES); ?>',
-                                        '<?php echo htmlspecialchars($row['curso_nome'], ENT_QUOTES); ?>',
-                                        '<?php echo date('Y-m-d', strtotime($row['data_inscricao'])); ?>',
-                                        '<?php echo $row['status']; ?>'
-                                    )">Editar</button>
-                                </td>
-                            </tr>
-                        <?php endwhile; ?>
-                    <?php else: ?>
+            <div class="table-responsive">
+                <table id="inscricoesTable" class="table">
+                    <thead class="thead-light">
                         <tr>
-                            <td colspan="6" style="text-align: center;">Nenhuma inscrição encontrada</td>
+                            <th>Nº</th>
+                            <th>Nome</th>
+                            <th>Curso</th>
+                            <th>Data</th>
+                            <th>Status</th>
+                            <th>Ações</th>
                         </tr>
-                    <?php endif; ?>
-                </tbody>
-            </table>
+                    </thead>
+                    <tbody>
+                        <?php if (!empty($inscricoes)): ?>
+                            <?php foreach ($inscricoes as $inscricao): ?>
+                                <tr>
+                                    <td><?php echo $inscricao['id']; ?></td>
+                                    <td><?php echo htmlspecialchars($inscricao['nome_completo']); ?></td>
+                                    <td><?php echo htmlspecialchars($inscricao['curso_nome']); ?></td>
+                                    <td><?php echo date('d/m/Y', strtotime($inscricao['data_inscricao'])); ?></td>
+                                    <td>
+                                        <span class="status-badge status-<?php echo $inscricao['status']; ?>">
+                                            <?php echo ucfirst($inscricao['status']); ?>
+                                        </span>
+                                    </td>
+                                    <td>
+                                        <div class="quick-actions">
+                                            <form method="post" class="d-inline">
+                                                <input type="hidden" name="id" value="<?php echo $inscricao['id']; ?>">
+                                                <button type="submit" name="aprovar" class="btn btn-success btn-sm" 
+                                                    <?php echo $inscricao['status'] == 'aprovado' ? 'disabled' : ''; ?>>
+                                                    Aprovar
+                                                </button>
+                                            </form>
+                                            <form method="post" class="d-inline">
+                                                <input type="hidden" name="id" value="<?php echo $inscricao['id']; ?>">
+                                                <button type="submit" name="rejeitar" class="btn btn-danger btn-sm" 
+                                                    <?php echo $inscricao['status'] == 'rejeitado' ? 'disabled' : ''; ?>>
+                                                    Rejeitar
+                                                </button>
+                                            </form>
+                                            <button class="btn btn-primary btn-sm" onclick="openViewModal(
+                                                <?php echo $inscricao['id']; ?>,
+                                                '<?php echo htmlspecialchars($inscricao['nome_completo'], ENT_QUOTES); ?>',
+                                                '<?php echo htmlspecialchars($inscricao['curso_nome'], ENT_QUOTES); ?>',
+                                                '<?php echo date('d/m/Y', strtotime($inscricao['data_inscricao'])); ?>',
+                                                '<?php echo $inscricao['status']; ?>',
+                                                '<?php echo htmlspecialchars($inscricao['email'], ENT_QUOTES); ?>',
+                                                '<?php echo htmlspecialchars($inscricao['telefone'], ENT_QUOTES); ?>',
+                                                '<?php echo htmlspecialchars($inscricao['bi_numero'], ENT_QUOTES); ?>',
+                                                '<?php echo htmlspecialchars($inscricao['sexo'], ENT_QUOTES); ?>'
+                                            )">Ver</button>
+                                            <button class="btn btn-secondary btn-sm" onclick="openEditModal(
+                                                <?php echo $inscricao['id']; ?>,
+                                                '<?php echo htmlspecialchars($inscricao['nome_completo'], ENT_QUOTES); ?>',
+                                                '<?php echo htmlspecialchars($inscricao['curso_nome'], ENT_QUOTES); ?>',
+                                                '<?php echo date('Y-m-d', strtotime($inscricao['data_inscricao'])); ?>',
+                                                '<?php echo $inscricao['status']; ?>',
+                                                '<?php echo htmlspecialchars($inscricao['observacoes'] ?? '', ENT_QUOTES); ?>'
+                                            )">Editar</button>
+                                        </div>
+                                    </td>
+                                </tr>
+                            <?php endforeach; ?>
+                        <?php else: ?>
+                            <tr>
+                                <td colspan="6" class="text-center py-4">Nenhuma inscrição encontrada</td>
+                            </tr>
+                        <?php endif; ?>
+                    </tbody>
+                </table>
+            </div>
         </div>
     </div>
-
+    
     <!-- Modal de Visualização -->
     <div id="viewModal" class="modal">
         <div class="modal-content">
@@ -335,8 +355,8 @@ if (isset($_GET['export'])) {
                     <div class="detail-row">
                         <span class="detail-label">Documentos:</span>
                         <div class="documents-list" id="view-documents">
-                            <a href="#" id="view-foto-passe" target="_blank">Foto de Passe</a><br>
-                            <a href="#" id="view-documento-bi" target="_blank">Documento de BI</a><br>
+                            <a href="#" id="view-foto-passe" target="_blank">Foto de Passe</a>
+                            <a href="#" id="view-documento-bi" target="_blank">Documento de BI</a>
                             <a href="#" id="view-comprovativo" target="_blank">Comprovativo</a>
                         </div>
                     </div>
@@ -361,19 +381,19 @@ if (isset($_GET['export'])) {
                 <div class="modal-body">
                     <div class="form-group">
                         <label for="edit-nome">Nome</label>
-                        <input type="text" id="edit-nome" readonly>
+                        <input type="text" id="edit-nome" class="form-control" readonly>
                     </div>
                     <div class="form-group">
                         <label for="edit-curso">Curso</label>
-                        <input type="text" id="edit-curso" readonly>
+                        <input type="text" id="edit-curso" class="form-control" readonly>
                     </div>
                     <div class="form-group">
                         <label for="edit-data">Data</label>
-                        <input type="text" id="edit-data" readonly>
+                        <input type="text" id="edit-data" class="form-control" readonly>
                     </div>
                     <div class="form-group">
                         <label for="edit-status">Status</label>
-                        <select id="edit-status" name="status" required>
+                        <select id="edit-status" name="status" class="form-control" required>
                             <option value="pendente">Pendente</option>
                             <option value="aprovado">Aprovado</option>
                             <option value="rejeitado">Rejeitado</option>
@@ -381,7 +401,7 @@ if (isset($_GET['export'])) {
                     </div>
                     <div class="form-group">
                         <label for="edit-observacoes">Observações</label>
-                        <textarea id="edit-observacoes" name="observacoes" rows="3"></textarea>
+                        <textarea id="edit-observacoes" name="observacoes" class="form-control" rows="3"></textarea>
                     </div>
                 </div>
                 <div class="modal-footer">
@@ -391,8 +411,9 @@ if (isset($_GET['export'])) {
             </form>
         </div>
     </div>
-
     <script>
+        
+
         // Funções para manipulação dos modais
         function openViewModal(id, nome, curso, data, status, email, telefone, bi, sexo) {
             document.getElementById('view-id').textContent = id;
@@ -416,12 +437,13 @@ if (isset($_GET['export'])) {
             document.getElementById('viewModal').style.display = 'block';
         }
         
-        function openEditModal(id, nome, curso, data, status) {
+        function openEditModal(id, nome, curso, data, status, observacoes) {
             document.getElementById('edit-id').value = id;
             document.getElementById('edit-nome').value = nome;
             document.getElementById('edit-curso').value = curso;
             document.getElementById('edit-data').value = data;
             document.getElementById('edit-status').value = status;
+            document.getElementById('edit-observacoes').value = observacoes || '';
             
             document.getElementById('editModal').style.display = 'block';
         }
@@ -444,7 +466,7 @@ if (isset($_GET['export'])) {
 
         // Fechar o dropdown se clicar fora dele
         window.onclick = function(event) {
-            if (!event.target.matches('.export-btn')) {
+            if (!event.target.matches('.export-btn') && !event.target.matches('.btn-primary')) {
                 var dropdowns = document.getElementsByClassName("dropdown-content");
                 for (var i = 0; i < dropdowns.length; i++) {
                     var openDropdown = dropdowns[i];
@@ -460,13 +482,11 @@ if (isset($_GET['export'])) {
             // Fechar o dropdown
             document.getElementById("exportDropdown").classList.remove("show");
             
-            // Obter os filtros atuais
-            const cursoFilter = "<?php echo $curso_filter; ?>";
-            
             if (format === 'csv') {
                 // Exportação para CSV
                 let url = 'admin-inscricoes.php?export=1';
                 
+                const cursoFilter = "<?php echo $curso_filter; ?>";
                 if (cursoFilter) {
                     url += '&curso=' + cursoFilter;
                 }
@@ -482,90 +502,173 @@ if (isset($_GET['export'])) {
             }
         }
 
-        // Função para exportar para PDF
-        function exportToPDF(status) {
+       function exportToPDF(status) {
             const { jsPDF } = window.jspdf;
-            const doc = new jsPDF();
-            
-            // Título do documento
-            doc.setFontSize(18);
-            doc.text('Relatório de Inscrições', 105, 15, { align: 'center' });
-            
-            // Filtros aplicados
-            doc.setFontSize(12);
-            let filtros = 'Status: ' + (status === 'all' ? 'Todos' : status.charAt(0).toUpperCase() + status.slice(1));
-            
-            const cursoFilter = "<?php echo $curso_filter; ?>";
-            const cursoNome = "<?php echo $curso_filter ? htmlspecialchars($cursos[$curso_filter]) : 'Todos'; ?>";
-            
-            filtros += '\nCurso: ' + cursoNome;
-            
-            doc.text(filtros, 14, 25);
-            
-            // Data de emissão
-            const dataEmissao = new Date().toLocaleDateString('pt-BR');
-            doc.text(`Emitido em: ${dataEmissao}`, 14, 35);
-            
-            // Cabeçalho da tabela
-            const headers = [
-                ['ID', 'Nome', 'Curso', 'Data', 'Status']
+            const doc = new jsPDF('p', 'pt', 'a4');
+
+            // Configurações iniciais
+            const pageWidth = doc.internal.pageSize.getWidth();
+            const margin = 40;
+            const tableStartY = 110;
+
+            // Cabeçalho
+            doc.setFontSize(20);
+            doc.setTextColor(33, 37, 41);
+            doc.setFont('helvetica', 'bold');
+            doc.text('RELATÓRIO DE INSCRIÇÕES', pageWidth / 2, 50, { align: 'center' });
+
+            // Linha decorativa
+            doc.setDrawColor(41, 128, 185);
+            doc.setLineWidth(1.5);
+            doc.line(margin, 65, pageWidth - margin, 65);
+
+            // Filtros
+            doc.setFontSize(11);
+            doc.setTextColor(100);
+            doc.setFont('helvetica', 'normal');
+
+            let filtros = [
+                `Status: ${status === 'all' ? 'Todos' : status.charAt(0).toUpperCase() + status.slice(1)}`,
+                `Curso: ${"<?php echo $curso_filter ? htmlspecialchars($cursos[$curso_filter]) : 'Todos'; ?>"}`,
+                `Emitido em: ${new Date().toLocaleDateString('pt-BR')}`
             ];
-            
-            // Dados da tabela
-            const table = document.getElementById('inscricoesTable');
-            const rows = table.querySelectorAll('tbody tr');
-            const data = [];
-            
-            rows.forEach(row => {
-                const cols = row.querySelectorAll('td');
-                if (cols.length >= 5) { // Verificar se a linha tem todas as colunas necessárias
-                    const statusElement = cols[4].querySelector('span');
-                    if (statusElement) {
-                        const rowStatus = statusElement.textContent.toLowerCase();
-                        
-                        // Aplicar filtro de status
-                        if (status === 'all' || rowStatus === status) {
-                            data.push([
-                                cols[0].textContent,
-                                cols[1].textContent,
-                                cols[2].textContent,
-                                cols[3].textContent,
-                                statusElement.textContent
-                            ]);
-                        }
-                    }
-                }
+
+            const colWidth = (pageWidth - 2 * margin) / 3;
+            filtros.forEach((text, index) => {
+                doc.text(text, margin + (colWidth * index), 80, {
+                    align: 'left',
+                    maxWidth: colWidth - 10
+                });
             });
-            
-            // Adicionar tabela ao PDF
+
+            // Cabeçalho da tabela
+            const headers = [[
+                { content: 'ID', styles: { fontStyle: 'bold', fillColor: [13, 110, 253], textColor: 255, cellPadding: 6 } },
+                { content: 'NOME', styles: { fontStyle: 'bold', fillColor: [13, 110, 253], textColor: 255, cellPadding: 6 } },
+                { content: 'CURSO', styles: { fontStyle: 'bold', fillColor: [13, 110, 253], textColor: 255, cellPadding: 6 } },
+                { content: 'DATA', styles: { fontStyle: 'bold', fillColor: [13, 110, 253], textColor: 255, cellPadding: 6 } },
+                { content: 'STATUS', styles: { fontStyle: 'bold', fillColor: [13, 110, 253], textColor: 255, cellPadding: 6 } }
+            ]];
+
+            // Obter dados da tabela HTML
+            const table = document.getElementById('inscricoesTable');
+            const rows = Array.from(table.querySelectorAll('tbody tr'));
+
+            const data = rows.map(row => {
+                const cells = row.querySelectorAll('td');
+                const rowStatus = cells[4].querySelector('span').textContent.toLowerCase().trim();
+
+                if (status === 'all' || rowStatus === status) {
+                    return [
+                        cells[0].textContent,
+                        cells[1].textContent,
+                        cells[2].textContent,
+                        cells[3].textContent,
+                        {
+                            content: cells[4].textContent.trim(),
+                            styles: {
+                                fontStyle: 'bold',
+                                textColor: rowStatus === 'aprovado' ? [25, 135, 84] :
+                                        rowStatus === 'pendente' ? [255, 193, 7] :
+                                        [220, 53, 69]
+                            }
+                        }
+                    ];
+                }
+                return null;
+            }).filter(row => row !== null);
+
+            // Adicionar tabela centralizada ao PDF
             doc.autoTable({
                 head: headers,
                 body: data,
-                startY: 40,
+                startY: tableStartY,
+                theme: 'striped',
+                tableWidth: 'wrap',
+                pagebreak: 'auto',
+
                 styles: {
                     fontSize: 10,
-                    cellPadding: 2
+                    cellPadding: 5,
+                    overflow: 'linebreak',
+                    valign: 'middle',
+                    font: 'helvetica',
+                    textColor: [33, 37, 41],
+                    lineColor: [222, 226, 230],
+                    lineWidth: 0.5
                 },
                 headStyles: {
-                    fillColor: [41, 128, 185],
+                    fillColor: [13, 110, 253],
                     textColor: 255,
-                    fontStyle: 'bold'
-                },
-                alternateRowStyles: {
-                    fillColor: [245, 245, 245]
+                    fontStyle: 'bold',
+                    halign: 'center'
                 },
                 columnStyles: {
-                    0: { cellWidth: 15 },
-                    1: { cellWidth: 50 },
-                    2: { cellWidth: 50 },
-                    3: { cellWidth: 25 },
-                    4: { cellWidth: 25 }
+                    0: { cellWidth: 40, halign: 'center' },
+                    1: { cellWidth: 100, halign: 'left' },
+                    2: { cellWidth: 80, halign: 'left' },
+                    3: { cellWidth: 60, halign: 'center' },
+                    4: { cellWidth: 50, halign: 'center' }
+                },
+                alternateRowStyles: {
+                    fillColor: [248, 249, 250]
+                },
+
+                didDrawPage: function (data) {
+                    // Centralizar a tabela dinamicamente
+                    const tableWidth = data.table.width;
+                    const centerMargin = (pageWidth - tableWidth) / 2;
+                    data.settings.margin.left = centerMargin;
+
+                    // Rodapé
+                    doc.setFontSize(9);
+                    doc.setTextColor(100);
+                    doc.setFont('helvetica', 'italic');
+
+                    const footerText = `Instituto Politécnico 30 de Setembro - Página ${doc.internal.getNumberOfPages()}`;
+                    doc.text(
+                        footerText,
+                        pageWidth / 2,
+                        doc.internal.pageSize.getHeight() - 20,
+                        { align: 'center' }
+                    );
+
+                    // Linha do rodapé
+                    doc.setDrawColor(222, 226, 230);
+                    doc.setLineWidth(0.5);
+                    doc.line(
+                        margin,
+                        doc.internal.pageSize.getHeight() - 30,
+                        pageWidth - margin,
+                        doc.internal.pageSize.getHeight() - 30
+                    );
                 }
             });
-            
-            // Salvar o PDF
-            doc.save(`inscricoes_${status}_${dataEmissao.replace(/\//g, '-')}.pdf`);
+
+            // Nome do ficheiro
+            const statusLabel = status === 'all' ? 'Todas' :
+                                status === 'aprovado' ? 'Aprovadas' :
+                                status === 'pendente' ? 'Pendentes' :
+                                'Rejeitadas';
+
+            const filename = `Inscricoes_${statusLabel}_${new Date().toISOString().slice(0, 10)}.pdf`;
+            doc.save(filename);
         }
+
+
+                // Fechar modal ao pressionar ESC
+                document.onkeydown = function(evt) {
+                    evt = evt || window.event;
+                    if (evt.key === "Escape") {
+                        const modals = document.querySelectorAll('.modal');
+                        modals.forEach(modal => {
+                            if (modal.style.display === 'block') {
+                                modal.style.display = 'none';
+                            }
+                        });
+                    }
+                };
+
     </script>
 </body>
 </html>
