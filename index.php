@@ -125,7 +125,7 @@
 						</div>
 						<div class="col-lg-2 col-12">
 							<div class="get-quote">
-								<a href="formluario_inscricao.html" class="btn">Inscrição</a>
+								<a href="pages/inscricao.php" class="btn">Inscrição</a>
 							</div>
 						</div>
 					</div>
