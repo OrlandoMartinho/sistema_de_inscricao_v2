@@ -5,26 +5,26 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Sobre Nós - Instituto Politécnico 30 De Setembro</title>
-    <link rel="stylesheet" href="../css/sobre.css">
-    <link rel="stylesheet" href="../css/style.css">
+    <link rel="stylesheet" href="./css1/sobre.css">
+    <link rel="stylesheet" href="./css/style.css">
   
 </head>
 
 <body>
     <!--inicio do header-->
-    <header style="background-image: url('../img/background-home.jpg');">
+    <header style="background-image: url('../img/img2.jpg');">
         <div class="container">
             <nav>
                 <!--logo-->
                 <a href=""></a>
                 <!--end logo-->
                 <ul>
-                    <a href="../index.html">Home</a>
-                    <a href="admin/login.html">Login</a>
-                    <a href="eventos.html">Eventos</a>
-                    <a href="contactos.html">Contactos</a>
-                    <a href="sobre.html">Sobre nós</a>
-                    <a class="btn" href="inscricao.html">Inscrição</a>
+                    <a href="../index.php">Home</a>
+                    <a href="admin/login.php">Login</a>
+                    <a href="eventos.php">Eventos</a>
+                    <a href="contactos.php">Contactos</a>
+                    <a href="sobre.php">Sobre nós</a>
+                    <a class="btn" href="inscricao.php">Inscrição</a>
 
                     <div class="close-icon">
                         <img src="img/close.png" alt="">

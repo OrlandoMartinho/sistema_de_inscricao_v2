@@ -27,12 +27,12 @@
                 </a>
                 <!--end logo-->
                 <ul>
-                    <a href="../index.html">Home</a>
-                    <a href="admin/login.html">Login</a>
-                    <a href="eventos.html">Eventos</a>
-                    <a href="contactos.html">Contactos</a>
-                    <a href="sobre.html">Sobre nós</a>
-                    <a class="btn" href="inscricao.html">Inscrição</a>
+                    <a href="../index.php">Home</a>
+                    <a href="admin/login.php">Login</a>
+                    <a href="#">Eventos</a>
+                    <a href="contactos.php">Contactos</a>
+                    <a href="sobre.php">Sobre nós</a>
+                    <a class="btn" href="inscricao.php">Inscrição</a>
 
                     <div class="close-icon">
                         <img src="../img/close.png" alt="">
