@@ -1,6 +1,10 @@
 <?php
 
- Session_start();
+ session_start();
+if (!isset($_SESSION['loggedin']) || $_SESSION['loggedin'] !== true) {
+    header("Location: login.php");
+    exit;
+}
 
 ?>
 
@@ -26,12 +30,12 @@
         <div class="admin-sidebar">
             <h3>Painel de Administração</h3>
             <div class="admin-menu">
-                <a href="admin-dashboard.html"><i>📊</i> Dashboard</a>
-                <a href="admin-eventos.html"><i>📅</i> Eventos</a>
-                <a href="admin-cursos.html" ><i>🎓</i> Cursos</a>
-                <a href="admin-contactos.html"><i>✉️</i> Contactos</a>
-                <a href="admin-inscricoes.html"><i>📝</i> Inscrições</a>
-                <a href="admin-config.html" class="active"><i>⚙️</i> Configurações</a>
+                <a href="admin-dashboard.php"><i>📊</i> Dashboard</a>
+                <a href="admin-eventos.php"><i>📅</i> Eventos</a>
+                <a href="admin-cursos.php" ><i>🎓</i> Cursos</a>
+                <a href="admin-contactos.php"><i>✉️</i> Contactos</a>
+                <a href="admin-inscricoes.php"><i>📝</i> Inscrições</a>
+                <a href="admin-config.php" class="active"><i>⚙️</i> Configurações</a>
             </div>
         </div>
         
