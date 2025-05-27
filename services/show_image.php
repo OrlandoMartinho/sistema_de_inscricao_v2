@@ -3,23 +3,22 @@ include('../../config/connection.php');
 
 $id = isset($_GET['id']) ? intval($_GET['id']) : 0;
 
-$stmt = $conn->prepare("SELECT foto FROM eventos WHERE id=?");
-$stmt->bind_param("i", $id);
-$stmt->execute();
-$stmt->store_result();
-
-if ($stmt->num_rows > 0) {
+if ($id > 0) {
+    $stmt = $conn->prepare("SELECT foto FROM eventos WHERE id = ?");
+    $stmt->bind_param("i", $id);
+    $stmt->execute();
     $stmt->bind_result($foto);
     $stmt->fetch();
+    $stmt->close();
     
-    header("Content-Type: image/jpeg"); // Ajuste para o tipo correto da imagem
-    echo $foto;
-} else {
-    // Pode exibir uma imagem padrão ou mensagem de erro
-    header("Content-Type: image/png");
-    readfile('path/to/default-image.png');
+    if (!empty($foto)) {
+        header("Content-Type: image/jpeg"); // ou o tipo apropriado
+        echo $foto;
+        exit;
+    }
 }
 
-$stmt->close();
-$conn->close();
+// Se não encontrar a imagem, retorna uma imagem padrão
+header("Location: ../../img/default-event.jpg");
+exit;
 ?>

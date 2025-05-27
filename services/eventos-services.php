@@ -13,7 +13,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         $local = $conn->real_escape_string($_POST['local']);
         $status = $conn->real_escape_string($_POST['status']);
         
-        // Processar upload da imagem como LONGBLOB
+        // Processar upload da imagem como LONGBLOBAA
         $foto = null;
         if (isset($_FILES['foto']) && $_FILES['foto']['error'] == UPLOAD_ERR_OK) {
             // Verificar tamanho do arquivo (opcional, recomendado)
