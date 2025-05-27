@@ -1,53 +1,9 @@
 <?php
+
 session_start();
+include('../../services/login.php');
 
-include('../../config/connection.php');
 
-
-// Processar o formulário de login
-if ($_SERVER['REQUEST_METHOD'] == 'POST') {
-    $conn = new mysqli($servername, $username, $password, $dbname);
-    
-    if ($conn->connect_error) {
-        die("Connection failed: " . $conn->connect_error);
-    }
-    
-    // Obter dados do formulário
-    $input_username = trim($_POST['username']);
-    $input_password = trim($_POST['password']);
-    
-    // Buscar usuário no banco de dados
-    $stmt = $conn->prepare("SELECT id, username, password FROM admin_users WHERE username = ?");
-    $stmt->bind_param("s", $input_username);
-    $stmt->execute();
-    $stmt->store_result();
-    
-    if ($stmt->num_rows == 1) {
-        $stmt->bind_result($id, $username, $hashed_password);
-        $stmt->fetch();
-        
-        // Verificar a senha
-        if (password_verify($input_password, $hashed_password)) {
-            // Autenticação bem-sucedida
-            $_SESSION['loggedin'] = true;
-            $_SESSION['id'] = $id;
-            $_SESSION['username'] = $username;
-            
-            // Redirecionar para o painel
-            header("Location: admin-dashboard.php");
-            exit;
-        } else {
-            // Senha incorreta
-            $login_error = "Usuário ou senha incorretos!";
-        }
-    } else {
-        // Usuário não encontrado
-        $login_error = "Usuário ou senha incorretos!";
-    }
-    
-    $stmt->close();
-    $conn->close();
-}
 ?>
 <!DOCTYPE html>
 <html lang="pt-br">

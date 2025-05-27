@@ -13,33 +13,35 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         $local = $conn->real_escape_string($_POST['local']);
         $status = $conn->real_escape_string($_POST['status']);
         
-        // Processar upload da imagem
+        // Processar upload da imagem como LONGBLOB
         $foto = null;
         if (isset($_FILES['foto']) && $_FILES['foto']['error'] == UPLOAD_ERR_OK) {
-            $foto = file_get_contents($_FILES['foto']['tmp_name']);
+            // Verificar tamanho do arquivo (opcional, recomendado)
+            if ($_FILES['foto']['size'] > 16777215) { // Limite de ~16MB
+                $message = 'A imagem é muito grande. Tamanho máximo permitido: 16MB';
+            } else {
+                $foto = file_get_contents($_FILES['foto']['tmp_name']);
+            }
         }
         
-        $stmt = $conn->prepare("INSERT INTO eventos (titulo, descricao, data_evento, local, foto, status) VALUES (?, ?, ?, ?, ?, ?)");
-        $null = NULL;
-        $stmt->bind_param("ssssbs", $titulo, $descricao, $data_evento, $local, $null, $status);
-        
-        if ($foto) {
-            $stmt->send_long_data(4, $foto);
-        }
-        
-        if ($stmt->execute()) {
-            $message = 'Evento adicionado com sucesso!';
+        if (!isset($message) || empty($message)) {
+            $stmt = $conn->prepare("INSERT INTO eventos (titulo, descricao, data_evento, local, foto, status) VALUES (?, ?, ?, ?, ?, ?)");
+            $stmt->bind_param("ssssbs", $titulo, $descricao, $data_evento, $local, $foto, $status);
             
-            // Registrar atividade
-            $acao = "Adicionou o evento: " . $titulo;
-            $stmt_activity = $conn->prepare("INSERT INTO atividades (acao, usuario, data_acao) VALUES (?, ?, NOW())");
-            $stmt_activity->bind_param("ss", $acao, $_SESSION['username']);
-            $stmt_activity->execute();
-            $stmt_activity->close();
-        } else {
-            $message = 'Erro ao adicionar evento: ' . $stmt->error;
+            if ($stmt->execute()) {
+                $message = 'Evento adicionado com sucesso!';
+                
+                // Registrar atividade
+                $acao = "Adicionou o evento: " . $titulo;
+                $stmt_activity = $conn->prepare("INSERT INTO atividades (acao, usuario, data_acao) VALUES (?, ?, NOW())");
+                $stmt_activity->bind_param("ss", $acao, $_SESSION['username']);
+                $stmt_activity->execute();
+                $stmt_activity->close();
+            } else {
+                $message = 'Erro ao adicionar evento: ' . $stmt->error;
+            }
+            $stmt->close();
         }
-        $stmt->close();
     }
     
     // Atualizar evento
@@ -53,29 +55,34 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         
         // Verificar se uma nova imagem foi enviada
         if (isset($_FILES['foto']) && $_FILES['foto']['error'] == UPLOAD_ERR_OK) {
-            $foto = file_get_contents($_FILES['foto']['tmp_name']);
-            $stmt = $conn->prepare("UPDATE eventos SET titulo=?, descricao=?, data_evento=?, local=?, foto=?, status=? WHERE id=?");
-            $null = NULL;
-            $stmt->bind_param("ssssbsi", $titulo, $descricao, $data_evento, $local, $null, $status, $id);
-            $stmt->send_long_data(4, $foto);
+            // Verificar tamanho do arquivo (opcional, recomendado)
+            if ($_FILES['foto']['size'] > 16777215) { // Limite de ~16MB
+                $message = 'A imagem é muito grande. Tamanho máximo permitido: 16MB';
+            } else {
+                $foto = file_get_contents($_FILES['foto']['tmp_name']);
+                $stmt = $conn->prepare("UPDATE eventos SET titulo=?, descricao=?, data_evento=?, local=?, foto=?, status=? WHERE id=?");
+                $stmt->bind_param("ssssbsi", $titulo, $descricao, $data_evento, $local, $foto, $status, $id);
+            }
         } else {
             $stmt = $conn->prepare("UPDATE eventos SET titulo=?, descricao=?, data_evento=?, local=?, status=? WHERE id=?");
             $stmt->bind_param("sssssi", $titulo, $descricao, $data_evento, $local, $status, $id);
         }
         
-        if ($stmt->execute()) {
-            $message = 'Evento atualizado com sucesso!';
-            
-            // Registrar atividade
-            $acao = "Atualizou o evento: " . $titulo;
-            $stmt_activity = $conn->prepare("INSERT INTO atividades (acao, usuario, data_acao) VALUES (?, ?, NOW())");
-            $stmt_activity->bind_param("ss", $acao, $_SESSION['username']);
-            $stmt_activity->execute();
-            $stmt_activity->close();
-        } else {
-            $message = 'Erro ao atualizar evento: ' . $stmt->error;
+        if (!isset($message) || empty($message)) {
+            if ($stmt->execute()) {
+                $message = 'Evento atualizado com sucesso!';
+                
+                // Registrar atividade
+                $acao = "Atualizou o evento: " . $titulo;
+                $stmt_activity = $conn->prepare("INSERT INTO atividades (acao, usuario, data_acao) VALUES (?, ?, NOW())");
+                $stmt_activity->bind_param("ss", $acao, $_SESSION['username']);
+                $stmt_activity->execute();
+                $stmt_activity->close();
+            } else {
+                $message = 'Erro ao atualizar evento: ' . $stmt->error;
+            }
+            $stmt->close();
         }
-        $stmt->close();
     }
 }
 
@@ -146,6 +153,4 @@ if (isset($_GET['edit'])) {
 }
 
 $conn->close();
-
-
 ?>

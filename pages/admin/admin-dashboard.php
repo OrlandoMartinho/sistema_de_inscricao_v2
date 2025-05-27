@@ -68,27 +68,9 @@ include '../../services/dashboard-services.php';
                     <a href="admin-inscricoes.php">Ver todos</a>
                 </div>
                 
-                <div class="card">
-                    <h4>Total de Usuários</h4>
-                    <div class="number"><?php echo $stats['usuarios']; ?></div>
-                    <a href="admin-config.php">Ver detalhes</a>
-                </div>
+               
             </div>
             
-            <div class="card">
-                <h3>Atividades Recentes</h3>
-                <?php if (!empty($stats['atividades'])): ?>
-                    <?php foreach ($stats['atividades'] as $activity): ?>
-                        <div class="activity-item">
-                            <span class="activity-action"><?php echo htmlspecialchars($activity['acao']); ?></span> - 
-                            <span class="activity-user"><?php echo htmlspecialchars($activity['usuario']); ?></span>
-                            <div class="activity-date"><?php echo date('d/m/Y H:i', strtotime($activity['data_acao'])); ?></div>
-                        </div>
-                    <?php endforeach; ?>
-                <?php else: ?>
-                    <p class="no-activity">Nenhuma atividade recente.</p>
-                <?php endif; ?>
-            </div>
         </div>
     </div>
 </body>

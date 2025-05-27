@@ -10,9 +10,7 @@ CREATE TABLE IF NOT EXISTS admin_users (
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
--- Inserir um usuário admin padrão (senha: admin123 - hash gerado com bcrypt)
-INSERT INTO admin_users (username, password) 
-VALUES ('admin', '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi');
+
 
 -- Tabela: notificacoes
 CREATE TABLE IF NOT EXISTS notificacoes (
@@ -58,15 +56,17 @@ CREATE TABLE IF NOT EXISTS inscricoes (
 );
 
 -- Tabela: eventos
-CREATE TABLE IF NOT EXISTS eventos (
+CREATE TABLE  IF NOT EXISTS eventos (
     id INT AUTO_INCREMENT PRIMARY KEY,
-    titulo VARCHAR(100) NOT NULL,
+    titulo VARCHAR(255) NOT NULL,
+    data_evento DATETIME NOT NULL,
+    local VARCHAR(255) NOT NULL,
     descricao TEXT,
-    data_evento DATETIME,
-    local VARCHAR(100),
-    foto LONGBLOB,
-    data_criacao TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    imagem VARCHAR(255), -- caminho da imagem ou nome do arquivo salvo
+    status ENUM('ativo', 'inativo') NOT NULL DEFAULT 'ativo',
+    criado_em TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
+
 
 -- Tabela: contactos
 CREATE TABLE IF NOT EXISTS contactos (
@@ -77,4 +77,11 @@ CREATE TABLE IF NOT EXISTS contactos (
     mensagem TEXT NOT NULL,
     data_envio TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     status ENUM('não lido', 'lido', 'respondido') DEFAULT 'não lido'
+);
+
+CREATE TABLE IF NOT EXISTS atividades (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    acao VARCHAR(255) NOT NULL,
+    usuario VARCHAR(100) NOT NULL,
+    data_acao DATETIME NOT NULL
 );

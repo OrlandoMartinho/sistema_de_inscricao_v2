@@ -11,7 +11,6 @@ include('../../config/connection.php');
 include '../../services/eventos-services.php';
 
 ?>
-
 <!DOCTYPE html>
 <html lang="pt-br">
 <head>
@@ -19,8 +18,20 @@ include '../../services/eventos-services.php';
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Admin - Eventos</title>
     <link rel="stylesheet" href="../css1/events-styles.css">
-    
-    
+    <style>
+        .event-image {
+            max-width: 100px;
+            max-height: 60px;
+            border-radius: 4px;
+            object-fit: cover;
+        }
+        .image-preview {
+            max-width: 200px;
+            max-height: 120px;
+            margin-top: 10px;
+            display: none;
+        }
+    </style>
 </head>
 <body>
     <header style="background-image: url('../../img/ac.jpg'); height: 150px;">
@@ -68,6 +79,7 @@ include '../../services/eventos-services.php';
             <table id="eventsTable">
                 <thead>
                     <tr>
+                        <th>Imagem</th>
                         <th>Título</th>
                         <th>Data</th>
                         <th>Local</th>
@@ -78,11 +90,18 @@ include '../../services/eventos-services.php';
                 <tbody>
                     <?php if (empty($eventos)): ?>
                         <tr>
-                            <td colspan="5" style="text-align: center;">Nenhum evento encontrado</td>
+                            <td colspan="6" style="text-align: center;">Nenhum evento encontrado</td>
                         </tr>
                     <?php else: ?>
                         <?php foreach ($eventos as $evento): ?>
                             <tr>
+                                <td>
+                                    <?php if (isset($evento['id'])): ?>
+                                        <img src="show_image.php?id=<?php echo $evento['id']; ?>" class="event-image" alt="Imagem do evento">
+                                    <?php else: ?>
+                                        <span>Sem imagem</span>
+                                    <?php endif; ?>
+                                </td>
                                 <td><?php echo htmlspecialchars($evento['titulo']); ?></td>
                                 <td><?php echo date('d/m/Y H:i', strtotime($evento['data_evento'])); ?></td>
                                 <td><?php echo htmlspecialchars($evento['local']); ?></td>
@@ -130,8 +149,9 @@ include '../../services/eventos-services.php';
                     </div>
                     <div class="form-group">
                         <label for="add-image">Imagem do Evento</label>
-                        <input type="file" id="add-image" name="foto" accept="image/*">
-                        <small>Formatos aceitos: JPG, PNG, GIF (Max: 2MB)</small>
+                        <input type="file" id="add-image" name="foto" accept="image/*" onchange="previewImage(this, 'add-preview')">
+                        <small>Formatos aceitos: JPG, PNG, GIF (Max: 16MB)</small>
+                        <img id="add-preview" class="image-preview" alt="Pré-visualização da imagem">
                     </div>
                     <div class="form-group">
                         <label for="add-status">Status*</label>
@@ -181,9 +201,14 @@ include '../../services/eventos-services.php';
                         <textarea id="edit-description" name="descricao"><?php echo htmlspecialchars($evento_edicao['descricao']); ?></textarea>
                     </div>
                     <div class="form-group">
-                        <label for="edit-image">Nova Imagem do Evento (opcional)</label>
-                        <input type="file" id="edit-image" name="foto" accept="image/*">
-                        <small>Deixe em branco para manter a imagem atual</small>
+                        <label>Imagem Atual</label>
+                        <div>
+                            <img src="show_image.php?id=<?php echo $evento_edicao['id']; ?>" class="event-image" alt="Imagem atual do evento">
+                        </div>
+                        <label for="edit-image" style="margin-top: 10px;">Nova Imagem do Evento (opcional)</label>
+                        <input type="file" id="edit-image" name="foto" accept="image/*" onchange="previewImage(this, 'edit-preview')">
+                        <small>Deixe em branco para manter a imagem atual (Max: 16MB)</small>
+                        <img id="edit-preview" class="image-preview" alt="Pré-visualização da nova imagem">
                     </div>
                     <div class="form-group">
                         <label for="edit-status">Status*</label>
@@ -237,6 +262,26 @@ include '../../services/eventos-services.php';
             
             // Mostrar o modal
             document.getElementById('deleteConfirmModal').style.display = 'block';
+        }
+        
+        // Função para pré-visualizar imagens antes do upload
+        function previewImage(input, previewId) {
+            const preview = document.getElementById(previewId);
+            const file = input.files[0];
+            
+            if (file) {
+                const reader = new FileReader();
+                
+                reader.onload = function(e) {
+                    preview.src = e.target.result;
+                    preview.style.display = 'block';
+                }
+                
+                reader.readAsDataURL(file);
+            } else {
+                preview.src = '';
+                preview.style.display = 'none';
+            }
         }
         
         // Fechar modais ao clicar fora deles
