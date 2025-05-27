@@ -2,11 +2,7 @@
 // Iniciar sessão
 session_start();
 
-// Configurações do banco de dados
-$servername = "localhost";
-$username = "root";
-$password = "";
-$dbname = "ip30set";
+include '../config/connection.php'; // Incluir arquivo de configuração do banco de dados
 
 // Processar formulário de inscrição
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
