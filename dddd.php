@@ -4,13 +4,12 @@ include '../config/connection.php';
 
 // Buscar cursos ativos do banco de dados
 $cursos_ativos = [];
-$conn = new mysqli($servername, $username, $password, $dbname);
-if (!$conn->connect_error) {
-    $result = $conn->query("SELECT id, nome FROM cursos WHERE status = 'ativo' ORDER BY nome");
-    while ($row = $result->fetch_assoc()) {
-        $cursos_ativos[] = $row;
-    }
-    $conn->close();
+try {
+    $query = "SELECT id, nome FROM cursos WHERE status = 'ativo'";
+    $stmt = $conn->query($query);
+    $cursos_ativos = $stmt->fetchAll(PDO::FETCH_ASSOC);
+} catch(PDOException $e) {
+    $_SESSION['error_message'] = "Erro ao carregar cursos: " . $e->getMessage();
 }
 
 // Processar formulário de inscrição
@@ -29,7 +28,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $bi_numero = htmlspecialchars(trim($_POST['bi_numero']));
     $sexo = in_array($_POST['sexo'], ['Masculino', 'Feminino']) ? $_POST['sexo'] : null;
     $curso_id = (int)$_POST['curso_id'];
-    $curso_nome = null;
+    $curso_nome = '';
     
     // Verificar dados obrigatórios
     if (empty($nome_completo) || empty($email) || empty($telefone) || empty($bi_numero) || !$sexo || !$curso_id) {
@@ -82,64 +81,50 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         exit();
     }
     
-    // Inserir no banco de dados
-    $conn = new mysqli($servername, $username, $password, $dbname);
-    
-    if ($conn->connect_error) {
-        $_SESSION['error_message'] = "Erro de conexão com o banco de dados. Por favor, tente novamente mais tarde.";
-        header("Location: inscricao.php");
-        exit();
-    }
-    
     // Verificar se já existe inscrição com o mesmo BI ou email
-    $stmt_check = $conn->prepare("SELECT id FROM inscricoes WHERE bi_numero = ? OR email = ?");
-    $stmt_check->bind_param("ss", $bi_numero, $email);
-    $stmt_check->execute();
-    $result = $stmt_check->get_result();
-    
-    if ($result->num_rows > 0) {
-        $_SESSION['error_message'] = "Já existe uma inscrição com este número de BI ou email.";
-        $stmt_check->close();
-        $conn->close();
+    try {
+        $stmt_check = $conn->prepare("SELECT id FROM inscricoes WHERE bi_numero = :bi_numero OR email = :email");
+        $stmt_check->bindParam(':bi_numero', $bi_numero);
+        $stmt_check->bindParam(':email', $email);
+        $stmt_check->execute();
+        
+        if ($stmt_check->rowCount() > 0) {
+            $_SESSION['error_message'] = "Já existe uma inscrição com este número de BI ou email.";
+            header("Location: inscricao.php");
+            exit();
+        }
+    } catch(PDOException $e) {
+        $_SESSION['error_message'] = "Erro ao verificar inscrição: " . $e->getMessage();
         header("Location: inscricao.php");
         exit();
     }
-    $stmt_check->close();
-    $stmt = $conn->prepare("INSERT INTO inscricoes 
-    (nome_completo, email, telefone, bi_numero, curso, sexo, curso_id, foto_passe, documento_bi, comprovativo) 
-    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
-
-// Usar tipos: s = string, i = integer
-// Como os campos de arquivos são NULL, use "s" e passe `null` diretamente
-$stmt->bind_param("ssssssisss", 
-    $nome_completo, 
-    $email, 
-    $telefone, 
-    $bi_numero, 
-    $curso_nome,
-    $sexo, 
-    $curso_id,
-    $foto_passe,     // null ou string base64 se estiver usando
-    $documento_bi,   // idem
-    $comprovativo    // idem
-);
-
-    // Bind os parâmetros blob separadamente
-    $stmt->send_long_data(6, $uploads['foto_passe']['conteudo']);
-    $stmt->send_long_data(7, $uploads['documento_bi']['conteudo']);
-    $stmt->send_long_data(8, $uploads['comprovativo']['conteudo']);
     
-    if ($stmt->execute()) {
-        $_SESSION['success_message'] = "Inscrição realizada com sucesso! Você receberá um email de confirmação.";
+    // Inserir a nova inscrição
+    try {
+        $stmt = $conn->prepare("INSERT INTO inscricoes 
+            (nome_completo, email, telefone, bi_numero, sexo, curso, curso_id, foto_passe, documento_bi, comprovativo) 
+            VALUES (:nome_completo, :email, :telefone, :bi_numero, :sexo, :curso, :curso_id, :foto_passe, :documento_bi, :comprovativo)");
         
-        // Aqui você pode adicionar o envio de email de confirmação
-        // enviarEmailConfirmacao($email, $nome_completo);
-    } else {
-        $_SESSION['error_message'] = "Erro ao registrar inscrição: " . $conn->error;
+        $stmt->bindParam(':nome_completo', $nome_completo);
+        $stmt->bindParam(':email', $email);
+        $stmt->bindParam(':telefone', $telefone);
+        $stmt->bindParam(':bi_numero', $bi_numero);
+        $stmt->bindParam(':sexo', $sexo);
+        $stmt->bindParam(':curso', $curso_nome);
+        $stmt->bindParam(':curso_id', $curso_id, PDO::PARAM_INT);
+        $stmt->bindParam(':foto_passe', $uploads['foto_passe']['conteudo'], PDO::PARAM_LOB);
+        $stmt->bindParam(':documento_bi', $uploads['documento_bi']['conteudo'], PDO::PARAM_LOB);
+        $stmt->bindParam(':comprovativo', $uploads['comprovativo']['conteudo'], PDO::PARAM_LOB);
+        
+        if ($stmt->execute()) {
+            $_SESSION['success_message'] = "Inscrição realizada com sucesso! Você receberá um email de confirmação.";
+        } else {
+            $_SESSION['error_message'] = "Erro ao registrar inscrição.";
+        }
+    } catch(PDOException $e) {
+        $_SESSION['error_message'] = "Erro ao registrar inscrição: " . $e->getMessage();
     }
     
-    $stmt->close();
-    $conn->close();
     header("Location: inscricao.php");
     exit();
 }

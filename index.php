@@ -110,7 +110,7 @@
 										<li><a href="#">Eventos <i class="icofont-rounded-down"></i></a>
 											<ul class="dropdown">
 												<li><a href="publicacoes.html">Publicações e actualizações</a></li>
-												<li><a href="estadoCandidatura.html">Vereficar estado de candidatura</a>
+												<li><a href="pages/estadoCandidatura.php">Vereficar estado de candidatura</a>
 												</li>
 											</ul>
 										</li>

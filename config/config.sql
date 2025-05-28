@@ -45,9 +45,9 @@ CREATE TABLE IF NOT EXISTS inscricoes (
     bi_numero VARCHAR(50) NOT NULL,
     sexo ENUM('Masculino', 'Feminino') NOT NULL,
     curso_id INT NOT NULL,
-    foto_passe LONGBLOB NOT NULL,
-    documento_bi LONGBLOB NOT NULL,
-    comprovativo LONGBLOB NOT NULL,
+    foto_passe LONGBLOB ,
+    documento_bi LONGBLOB ,
+    comprovativo LONGBLOB ,
     data_inscricao TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     status ENUM('pendente', 'aprovado', 'rejeitado') DEFAULT 'pendente',
     FOREIGN KEY (curso_id) REFERENCES cursos(id)
@@ -88,3 +88,5 @@ CREATE TABLE IF NOT EXISTS atividades (
 
 
 ALTER TABLE `inscricoes` ADD `observacoes` VARCHAR(255) NOT NULL AFTER `status`;
+
+ALTER TABLE `inscricoes` ADD `curso` VARCHAR(255) NOT NULL AFTER `observacoes`;
