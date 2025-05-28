@@ -18,6 +18,8 @@ include '../../services/contactos-services.php';
     <title>Admin - Contactos</title>
     <link rel="stylesheet" href="../css1/admin/contactos/contactos.css">
     <link rel="stylesheet" href="../css1/contacts-modal.css">
+       <!-- Favicon -->
+    <link rel="icon" href="../../img/30 DE SEPTEMBRO.png">
 </head>
 <body>
     <header style="background-image: url('../../img/ac.jpg'); height: 150px;">

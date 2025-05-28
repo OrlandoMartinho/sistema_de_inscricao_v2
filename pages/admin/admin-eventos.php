@@ -18,6 +18,8 @@ include '../../services/eventos-services.php';
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Admin - Eventos</title>
     <link rel="stylesheet" href="../css1/events-styles.css">
+       <!-- Favicon -->
+    <link rel="icon" href="../../img/30 DE SEPTEMBRO.png">
     <style>
         .event-image {
             max-width: 100px;

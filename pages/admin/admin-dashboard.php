@@ -19,7 +19,9 @@ include '../../services/dashboard-services.php';
     <title>Admin - Dashboard</title>
     <link rel="stylesheet" href="../css1/admin/home.css">
     <link rel="stylesheet" href="../css1/dashboard-styles.css">
-    </style>
+       <!-- Favicon -->
+    <link rel="icon" href="../../img/30 DE SEPTEMBRO.png">
+
 </head>
 <body>
     <header style="background-image: url('../../img/ac.jpg'); height: 150px;">

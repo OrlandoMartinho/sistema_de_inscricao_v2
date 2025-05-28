@@ -154,6 +154,8 @@ if (isset($_GET['edit'])) {
     <!-- Bibliotecas para exportação PDF -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.25/jspdf.plugin.autotable.min.js"></script>
+       <!-- Favicon -->
+    <link rel="icon" href="../../img/30 DE SEPTEMBRO.png">
 </head>
 <body>
     <header style="background-image: url('../../img/ac.jpg'); height: 150px;">

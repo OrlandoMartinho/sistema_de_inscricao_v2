@@ -19,6 +19,8 @@ include('../../services/login.php');
   <title>Admin - Login</title>
   <link rel="stylesheet" href="../css1/admin/login.css" />
   <link rel="stylesheet" href="../../css/style.css">
+     <!-- Favicon -->
+    <link rel="icon" href="../../img/30 DE SEPTEMBRO.png">
   <style>
     /* Estilos para o modal */
     .modal {

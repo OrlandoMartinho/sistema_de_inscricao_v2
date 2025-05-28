@@ -20,6 +20,8 @@ include '../../services/cursos-services.php';
     <title>Admin - Cursos</title>
     <link rel="stylesheet" href="../css1/admin/cursos/cursos.css">
     <link rel="stylesheet" href="../css1/cursos-modais.css">
+       <!-- Favicon -->
+    <link rel="icon" href="../../img/30 DE SEPTEMBRO.png">
 </head>
 <body>
     <header style="background-image: url('../../img/ac.jpg'); height: 150px;">
