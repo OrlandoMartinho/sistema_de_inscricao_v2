@@ -75,46 +75,47 @@ include '../../services/eventos-services.php';
                     <button type="submit" style="margin-left: 5px; padding: 0 15px; background: #3498db; color: white; border: none; border-radius: 4px; cursor: pointer;">Buscar</button>
                 </form>
             </div>
-            
-            <table id="eventsTable">
-                <thead>
-                    <tr>
-                        <th>Imagem</th>
-                        <th>Título</th>
-                        <th>Data</th>
-                        <th>Local</th>
-                        <th>Status</th>
-                        <th>Ações</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <?php if (empty($eventos)): ?>
-                        <tr>
-                            <td colspan="6" style="text-align: center;">Nenhum evento encontrado</td>
-                        </tr>
-                    <?php else: ?>
-                        <?php foreach ($eventos as $evento): ?>
-                            <tr>
-                                <td>
-                                    <?php if (isset($evento['id'])): ?>
-                                        <img src="show_image.php?id=<?php echo $evento['id']; ?>" class="event-image" alt="Imagem do evento">
-                                    <?php else: ?>
-                                        <span>Sem imagem</span>
-                                    <?php endif; ?>
-                                </td>
-                                <td><?php echo htmlspecialchars($evento['titulo']); ?></td>
-                                <td><?php echo date('d/m/Y H:i', strtotime($evento['data_evento'])); ?></td>
-                                <td><?php echo htmlspecialchars($evento['local']); ?></td>
-                                <td><?php echo htmlspecialchars($evento['status']); ?></td>
-                                <td>
-                                    <button class="action-btn edit-btn" onclick="window.location.href='admin-eventos.php?edit=<?php echo $evento['id']; ?>'">Editar</button>
-                                    <button class="action-btn delete-btn" onclick="confirmDelete(<?php echo $evento['id']; ?>)">Excluir</button>
-                                </td>
-                            </tr>
-                        <?php endforeach; ?>
-                    <?php endif; ?>
-                </tbody>
-            </table>
+          <table id="eventsTable">
+    <thead>
+        <tr>
+            <th>Imagem</th>
+            <th>Título</th>
+            <th>Data</th>
+            <th>Local</th>
+            <th>Status</th>
+            <th>Ações</th>
+        </tr>
+    </thead>
+    <tbody>
+        <?php if (empty($eventos)): ?>
+            <tr>
+                <td colspan="6" style="text-align: center;">Nenhum evento encontrado</td>
+            </tr>
+        <?php else: ?>
+            <?php foreach ($eventos as $evento): ?>
+                <tr>
+                    <td>
+                        <?php if (!empty($evento['foto'])): ?>
+                            <img src="data:image/jpeg;base64,<?= base64_encode($evento['foto']) ?>" class="event-image" alt="Imagem do evento">
+                        <?php else: ?>
+                            <span>Sem imagem</span>
+                        <?php endif; ?>
+
+                    </td>
+                    <td><?= htmlspecialchars($evento['titulo']) ?></td>
+                    <td><?= date('d/m/Y H:i', strtotime($evento['data_evento'])) ?></td>
+                    <td><?= htmlspecialchars($evento['local']) ?></td>
+                    <td><?= htmlspecialchars($evento['status']) ?></td>
+                    <td>
+                        <button class="action-btn edit-btn" onclick="window.location.href='admin-eventos.php?edit=<?= $evento['id'] ?>'">Editar</button>
+                        <button class="action-btn delete-btn" onclick="confirmDelete(<?= $evento['id'] ?>)">Excluir</button>
+                    </td>
+                </tr>
+            <?php endforeach; ?>
+        <?php endif; ?>
+    </tbody>
+</table>
+
         </div>
     </div>
     
@@ -203,8 +204,10 @@ include '../../services/eventos-services.php';
                     <div class="form-group">
                         <label>Imagem Atual</label>
                         <div>
-                            <img src="show_image.php?id=<?php echo $evento_edicao['id']; ?>" class="event-image" alt="Imagem atual do evento">
+                           <img src="data:image/jpeg;base64,<?= base64_encode($evento['foto']) ?>" class="event-image" alt="Imagem atual do evento">
+
                         </div>
+
                         <label for="edit-image" style="margin-top: 10px;">Nova Imagem do Evento (opcional)</label>
                         <input type="file" id="edit-image" name="foto" accept="image/*" onchange="previewImage(this, 'edit-preview')">
                         <small>Deixe em branco para manter a imagem atual (Max: 16MB)</small>

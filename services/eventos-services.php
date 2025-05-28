@@ -1,5 +1,9 @@
 <?php
 
+
+
+include('../../config/connection.php');
+
 // Variável para mensagens de sucesso/erro
 $message = '';
 
@@ -13,20 +17,32 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         $local = $conn->real_escape_string($_POST['local']);
         $status = $conn->real_escape_string($_POST['status']);
         
-        // Processar upload da imagem como LONGBLOBAA
+        // Processar upload da imagem
         $foto = null;
         if (isset($_FILES['foto']) && $_FILES['foto']['error'] == UPLOAD_ERR_OK) {
-            // Verificar tamanho do arquivo (opcional, recomendado)
-            if ($_FILES['foto']['size'] > 16777215) { // Limite de ~16MB
+            // Verificar tipo e tamanho do arquivo
+            $allowed_types = ['image/jpeg', 'image/png', 'image/gif'];
+            $max_size = 16 * 1024 * 1024; // 16MB
+            
+            if ($_FILES['foto']['size'] > $max_size) {
                 $message = 'A imagem é muito grande. Tamanho máximo permitido: 16MB';
+            } elseif (!in_array($_FILES['foto']['type'], $allowed_types)) {
+                $message = 'Tipo de arquivo não permitido. Use apenas JPG, PNG ou GIF.';
             } else {
                 $foto = file_get_contents($_FILES['foto']['tmp_name']);
             }
         }
         
-        if (!isset($message) || empty($message)) {
-            $stmt = $conn->prepare("INSERT INTO eventos (titulo, descricao, data_evento, local, foto, status) VALUES (?, ?, ?, ?, ?, ?)");
-            $stmt->bind_param("ssssbs", $titulo, $descricao, $data_evento, $local, $foto, $status);
+        if (empty($message)) {
+            if ($foto !== null) {
+                $stmt = $conn->prepare("INSERT INTO eventos (titulo, descricao, data_evento, local, foto, status) VALUES (?, ?, ?, ?, ?, ?)");
+                $null = null;
+                $stmt->bind_param("ssssbs", $titulo, $descricao, $data_evento, $local, $null, $status);
+                $stmt->send_long_data(4, $foto); // Envia os dados blob
+            } else {
+                $stmt = $conn->prepare("INSERT INTO eventos (titulo, descricao, data_evento, local, status) VALUES (?, ?, ?, ?, ?)");
+                $stmt->bind_param("sssss", $titulo, $descricao, $data_evento, $local, $status);
+            }
             
             if ($stmt->execute()) {
                 $message = 'Evento adicionado com sucesso!';
@@ -55,20 +71,27 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         
         // Verificar se uma nova imagem foi enviada
         if (isset($_FILES['foto']) && $_FILES['foto']['error'] == UPLOAD_ERR_OK) {
-            // Verificar tamanho do arquivo (opcional, recomendado)
-            if ($_FILES['foto']['size'] > 16777215) { // Limite de ~16MB
+            $allowed_types = ['image/jpeg', 'image/png', 'image/gif'];
+            $max_size = 16 * 1024 * 1024; // 16MB
+            
+            if ($_FILES['foto']['size'] > $max_size) {
                 $message = 'A imagem é muito grande. Tamanho máximo permitido: 16MB';
+            } elseif (!in_array($_FILES['foto']['type'], $allowed_types)) {
+                $message = 'Tipo de arquivo não permitido. Use apenas JPG, PNG ou GIF.';
             } else {
                 $foto = file_get_contents($_FILES['foto']['tmp_name']);
+                
                 $stmt = $conn->prepare("UPDATE eventos SET titulo=?, descricao=?, data_evento=?, local=?, foto=?, status=? WHERE id=?");
-                $stmt->bind_param("ssssbsi", $titulo, $descricao, $data_evento, $local, $foto, $status, $id);
+                $null = null;
+                $stmt->bind_param("ssssbsi", $titulo, $descricao, $data_evento, $local, $null, $status, $id);
+                $stmt->send_long_data(4, $foto); // Envia os dados blob
             }
         } else {
             $stmt = $conn->prepare("UPDATE eventos SET titulo=?, descricao=?, data_evento=?, local=?, status=? WHERE id=?");
             $stmt->bind_param("sssssi", $titulo, $descricao, $data_evento, $local, $status, $id);
         }
         
-        if (!isset($message) || empty($message)) {
+        if (empty($message)) {
             if ($stmt->execute()) {
                 $message = 'Evento atualizado com sucesso!';
                 
@@ -117,10 +140,10 @@ if (isset($_GET['delete'])) {
     $stmt->close();
 }
 
-// Buscar eventos
+// Buscar eventos (incluindo a coluna de foto para verificação)
 $eventos = [];
 $search = isset($_GET['search']) ? $conn->real_escape_string($_GET['search']) : '';
-$query = "SELECT id, titulo, data_evento, local, status FROM eventos";
+$query = "SELECT id, titulo, data_evento, local, status, foto IS NOT NULL AS has_image FROM eventos";
 
 if (!empty($search)) {
     $query .= " WHERE titulo LIKE '%$search%' OR local LIKE '%$search%' OR descricao LIKE '%$search%'";
@@ -152,5 +175,6 @@ if (isset($_GET['edit'])) {
     }
 }
 
-$conn->close();
+// Não feche a conexão aqui se for usada em outros includes
+// $conn->close();
 ?>

@@ -410,9 +410,7 @@ if (isset($_SESSION['flash_message'])) {
                                         <i class="fa fa-<?= $isPastEvent ? 'calendar-times' : 'calendar-check' ?>"></i>
                                         <?= $isPastEvent ? 'Evento Realizado' : date('H:i', strtotime($evento['data_evento'])) ?>
                                     </span>
-                                    <a href="evento-detalhes.php?id=<?= $evento['id'] ?>" class="event-button">
-                                        Ver Detalhes <i class="fa fa-arrow-right"></i>
-                                    </a>
+                                 
                                 </div>
                             </div>
                         </div>
