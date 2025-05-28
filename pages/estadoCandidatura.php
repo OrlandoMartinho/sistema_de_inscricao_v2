@@ -3,18 +3,21 @@
 require_once '../config/connection.php';
 
 // Initialize variables
-$email = '';
+$search_value = '';
 $message = '';
 $candidate_data = null;
 
 // Check if form is submitted
 if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['btn_verificar'])) {
-    $email = trim($_POST['verificar']);
+    $search_value = trim($_POST['verificar']);
     
-    if (!empty($email)) {
+    if (!empty($search_value)) {
+        // Determine if the input is an email or BI number
+        $search_by = filter_var($search_value, FILTER_VALIDATE_EMAIL) ? 'email' : 'bi_numero';
+        
         // Prepare SQL statement to prevent SQL injection
-        $stmt = $conn->prepare("SELECT * FROM inscricoes WHERE email = ?");
-        $stmt->bind_param("s", $email);
+        $stmt = $conn->prepare("SELECT * FROM inscricoes WHERE $search_by = ?");
+        $stmt->bind_param("s", $search_value);
         $stmt->execute();
         $result = $stmt->get_result();
         
@@ -22,12 +25,12 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['btn_verificar'])) {
             $candidate_data = $result->fetch_assoc();
             $message = "Candidatura encontrada! Status: " . ucfirst($candidate_data['status']);
         } else {
-            $message = "Nenhuma candidatura encontrada com este email.";
+            $message = "Nenhuma candidatura encontrada com estes dados.";
         }
         
         $stmt->close();
     } else {
-        $message = "Por favor, insira um email válido.";
+        $message = "Por favor, insira um email ou número de BI válido.";
     }
 }
 
@@ -127,6 +130,13 @@ $conn->close();
             #pdf-template {
                 display: none;
             }
+            .search-options {
+                margin-bottom: 15px;
+            }
+            .search-options label {
+                margin-right: 15px;
+                cursor: pointer;
+            }
         </style>
     </head>
     <body>
@@ -162,14 +172,14 @@ $conn->close();
                                 <div class="main-menu">
                                     <nav class="navigation">
                                         <ul class="nav menu">
-                                            <li><a href="index.php">Inicio</a></li>
+                                            <li><a href="../index.php">Inicio</a></li>
                                             <li><a href="#">Eventos <i class="icofont-rounded-down"></i></a>
                                                 <ul class="dropdown">
                                                     <li><a href="publicacoes.php">Publicações e atualizações</a></li>
-                                                    <li><a href="verificar_candidatura.php">Verificar candidatura</a></li>
+                                                    <li><a href="estadoCandidatura.php">Verificar candidatura</a></li>
                                                 </ul>
                                             </li>
-                                            <li><a href="cursos.php">Cursos</a></li>
+                                           <li><a href="cursos.php">Cursos</a></li>
                                             <li><a href="contactos.php">Contactos</a></li>
                                             <li><a href="sobre.php">Sobre nós</a></li>
                                             <li><a href="ajuda.php">Ajuda</a></li>
@@ -196,11 +206,11 @@ $conn->close();
                         <!-- Verification Form -->
                         <div class="error-inner">
                             <h1><span>Verificar estado de sua candidatura</span></h1>
-                            <p>Digite o e-mail utilizado na sua inscrição para verificar o status da sua candidatura.</p>
+                            <p>Digite o e-mail ou número do BI utilizado na sua inscrição para verificar o status da sua candidatura.</p>
                             <br>
                             <form action="" method="POST">
                                 <div class="form-group">
-                                    <input type="email" name="verificar" id="verificar" placeholder="Digite o seu email" value="<?php echo htmlspecialchars($email); ?>" required class="form-control" style="max-width: 400px; display: inline-block;">
+                                    <input type="text" name="verificar" id="verificar" placeholder="Digite seu email ou número do BI" value="<?php echo htmlspecialchars($search_value); ?>" required class="form-control" style="max-width: 400px; display: inline-block;">
                                     <input type="submit" name="btn_verificar" id="btn_verificar" value="Verificar" class="btn btn-primary">
                                 </div>
                             </form>
@@ -218,6 +228,7 @@ $conn->close();
                                         <div class="row">
                                             <div class="col-md-6">
                                                 <p><strong>Nome Completo:</strong> <?php echo htmlspecialchars($candidate_data['nome_completo']); ?></p>
+                                                <p><strong>Número do BI:</strong> <?php echo htmlspecialchars($candidate_data['bi_numero']); ?></p>
                                                 <p><strong>Email:</strong> <?php echo htmlspecialchars($candidate_data['email']); ?></p>
                                                 <p><strong>Telefone:</strong> <?php echo htmlspecialchars($candidate_data['telefone']); ?></p>
                                             </div>
@@ -247,6 +258,10 @@ $conn->close();
                                             <tr>
                                                 <th width="30%" style="background-color: #f2f2f2; text-align: left; padding: 8px;">Nome Completo</th>
                                                 <td width="70%" style="padding: 8px;"><?php echo htmlspecialchars($candidate_data['nome_completo']); ?></td>
+                                            </tr>
+                                            <tr>
+                                                <th style="background-color: #f2f2f2; text-align: left; padding: 8px;">Número do BI</th>
+                                                <td style="padding: 8px;"><?php echo htmlspecialchars($candidate_data['bi_numero']); ?></td>
                                             </tr>
                                             <tr>
                                                 <th style="background-color: #f2f2f2; text-align: left; padding: 8px;">Email</th>
@@ -351,23 +366,6 @@ $conn->close();
         <!-- Bootstrap JS -->
         <script src="../js/bootstrap.min.js"></script>
         <!-- jsPDF -->
-         <!-- Para Bootstrap 4 -->
-        <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js"></script>
-
-        <!-- Ou, para Bootstrap 5 -->
-        <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.6/dist/umd/popper.min.js"></script>
-
-        <!-- Em seguida, inclua o Bootstrap -->
-        <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"></script>
-        <!-- Para Bootstrap 4 -->
-        <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js"></script>
-
-        <!-- Ou, para Bootstrap 5 -->
-        <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.6/dist/umd/popper.min.js"></script>
-
-        <!-- Em seguida, inclua o Bootstrap -->
-        <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"></script>
-
         <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
         <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
         
@@ -375,62 +373,63 @@ $conn->close();
         <script src="../js/main.js"></script>
         
         <script>
-    document.addEventListener('DOMContentLoaded', function() {
-        const generatePdfBtn = document.getElementById('generate-pdf');
-        
-        if (generatePdfBtn) {
-            generatePdfBtn.addEventListener('click', function() {
-                // Criar um novo PDF
-                const { jsPDF } = window.jspdf;
-                const pdf = new jsPDF('p', 'mm', 'a4');
+            document.addEventListener('DOMContentLoaded', function() {
+                const generatePdfBtn = document.getElementById('generate-pdf');
                 
-                // Adicionar conteúdo ao PDF manualmente
-                pdf.setFontSize(16);
-                pdf.setTextColor(40);
-                pdf.text('Instituto politécnico 30 De Setembro', 105, 20, { align: 'center' });
-                
-                pdf.setFontSize(14);
-                pdf.text('Comprovante de Inscrição', 105, 30, { align: 'center' });
-                
-                pdf.setFontSize(10);
-                pdf.text('Este documento serve como comprovante de inscrição no processo seletivo.', 105, 38, { align: 'center' });
-                
-                // Linha divisória
-                pdf.line(20, 42, 190, 42);
-                
-                // Dados da candidatura
-                pdf.setFontSize(12);
-                let yPosition = 50;
-                
-                // Função para adicionar campo
-                const addField = (label, value) => {
-                    pdf.text(`${label}:`, 20, yPosition);
-                    pdf.text(value, 70, yPosition);
-                    yPosition += 8;
-                };
-                
-                // Adicionar campos dinamicamente
-                addField('Nome Completo', '<?php echo htmlspecialchars($candidate_data["nome_completo"] ?? ""); ?>');
-                addField('Email', '<?php echo htmlspecialchars($candidate_data["email"] ?? ""); ?>');
-                addField('Telefone', '<?php echo htmlspecialchars($candidate_data["telefone"] ?? ""); ?>');
-                addField('Curso', '<?php echo htmlspecialchars($candidate_data["curso"] ?? ""); ?>');
-                addField('Status', '<?php echo ucfirst(htmlspecialchars($candidate_data["status"] ?? "")); ?>');
-                addField('Data de Inscrição', '<?php echo isset($candidate_data["data_inscricao"]) ? date("d/m/Y H:i", strtotime($candidate_data["data_inscricao"])) : ""; ?>');
-                
-                // Rodapé
-                pdf.setFontSize(8);
-                pdf.text(`Documento gerado automaticamente em ${new Date().toLocaleString()}`, 105, 280, { align: 'center' });
-                
-                // Gerar nome do arquivo
-                const filename = 'comprovante_inscricao_' + 
-                    '<?php echo isset($candidate_data) ? preg_replace("/[^a-zA-Z0-9]+/", "_", $candidate_data["nome_completo"]) : "candidato"; ?>' + 
-                    '.pdf';
-                
-                // Salvar o PDF
-                pdf.save(filename);
+                if (generatePdfBtn) {
+                    generatePdfBtn.addEventListener('click', function() {
+                        // Criar um novo PDF
+                        const { jsPDF } = window.jspdf;
+                        const pdf = new jsPDF('p', 'mm', 'a4');
+                        
+                        // Adicionar conteúdo ao PDF manualmente
+                        pdf.setFontSize(16);
+                        pdf.setTextColor(40);
+                        pdf.text('Instituto politécnico 30 De Setembro', 105, 20, { align: 'center' });
+                        
+                        pdf.setFontSize(14);
+                        pdf.text('Comprovante de Inscrição', 105, 30, { align: 'center' });
+                        
+                        pdf.setFontSize(10);
+                        pdf.text('Este documento serve como comprovante de inscrição no processo seletivo.', 105, 38, { align: 'center' });
+                        
+                        // Linha divisória
+                        pdf.line(20, 42, 190, 42);
+                        
+                        // Dados da candidatura
+                        pdf.setFontSize(12);
+                        let yPosition = 50;
+                        
+                        // Função para adicionar campo
+                        const addField = (label, value) => {
+                            pdf.text(`${label}:`, 20, yPosition);
+                            pdf.text(value, 70, yPosition);
+                            yPosition += 8;
+                        };
+                        
+                        // Adicionar campos dinamicamente
+                        addField('Nome Completo', '<?php echo htmlspecialchars($candidate_data["nome_completo"] ?? ""); ?>');
+                        addField('Número do BI', '<?php echo htmlspecialchars($candidate_data["bi_numero"] ?? ""); ?>');
+                        addField('Email', '<?php echo htmlspecialchars($candidate_data["email"] ?? ""); ?>');
+                        addField('Telefone', '<?php echo htmlspecialchars($candidate_data["telefone"] ?? ""); ?>');
+                        addField('Curso', '<?php echo htmlspecialchars($candidate_data["curso"] ?? ""); ?>');
+                        addField('Status', '<?php echo ucfirst(htmlspecialchars($candidate_data["status"] ?? "")); ?>');
+                        addField('Data de Inscrição', '<?php echo isset($candidate_data["data_inscricao"]) ? date("d/m/Y H:i", strtotime($candidate_data["data_inscricao"])) : ""; ?>');
+                        
+                        // Rodapé
+                        pdf.setFontSize(8);
+                        pdf.text(`Documento gerado automaticamente em ${new Date().toLocaleString()}`, 105, 280, { align: 'center' });
+                        
+                        // Gerar nome do arquivo
+                        const filename = 'comprovante_inscricao_' + 
+                            '<?php echo isset($candidate_data) ? preg_replace("/[^a-zA-Z0-9]+/", "_", $candidate_data["nome_completo"]) : "candidato"; ?>' + 
+                            '.pdf';
+                        
+                        // Salvar o PDF
+                        pdf.save(filename);
+                    });
+                }
             });
-        }
-    });
-</script>
+        </script>
     </body>
 </html>

@@ -5,6 +5,18 @@ session_start();
 // Conexão com o banco de dados
 require_once '../config/connection.php';
 
+// Buscar cursos ativos do banco de dados
+try {
+    $stmt = $conn->query("SELECT * FROM cursos WHERE status = 'ativo' ORDER BY nome");
+    $cursos = $stmt->fetch_all(MYSQLI_ASSOC);
+} catch (PDOException $e) {
+    $cursos = [];
+    $_SESSION['flash_message'] = [
+        'type' => 'error',
+        'message' => 'Erro ao carregar cursos: ' . $e->getMessage()
+    ];
+}
+
 // Verifica se há mensagens flash para exibir
 if (isset($_SESSION['flash_message'])) {
     $flash_message = $_SESSION['flash_message'];
@@ -18,13 +30,13 @@ if (isset($_SESSION['flash_message'])) {
     <!-- Meta Tags -->
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta name="keywords" content="Instituto politécnico 30 De Setembro, sobre, história, Angola">
-    <meta name="description" content="Conheça mais sobre o Instituto politécnico 30 De Setembro">
+    <meta name="keywords" content="Instituto politécnico 30 De Setembro, cursos, Angola">
+    <meta name="description" content="Página de cursos do Instituto politécnico 30 De Setembro">
     <meta name='copyright' content='Instituto politécnico 30 De Setembro'>
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 
     <!-- Title -->
-    <title>Sobre Nós - Instituto politécnico 30 De Setembro</title>
+    <title>Cursos - Instituto politécnico 30 De Setembro</title>
 
     <!-- Favicon -->
     <link rel="icon" href="../img/30 DE SEPTEMBRO.png">
@@ -43,8 +55,8 @@ if (isset($_SESSION['flash_message'])) {
     <link rel="stylesheet" href="../css/responsive.css">
     
     <style>
-        .about-banner {
-            background-image: url('../img/ab.jpg');
+        .courses-banner {
+            background-image: url('../img/courses-banner.jpg');
             background-size: cover;
             background-position: center;
             padding: 150px 0;
@@ -52,7 +64,7 @@ if (isset($_SESSION['flash_message'])) {
             color: #fff;
             position: relative;
         }
-        .about-banner::before {
+        .courses-banner::before {
             content: '';
             position: absolute;
             top: 0;
@@ -61,66 +73,101 @@ if (isset($_SESSION['flash_message'])) {
             height: 100%;
             background-color: rgba(0, 0, 0, 0.6);
         }
-        .about-banner h1 {
+        .courses-banner h1 {
             font-size: 48px;
             margin-bottom: 20px;
             position: relative;
         }
-        .about-section {
+        .courses-banner p {
+            font-size: 18px;
+            position: relative;
+        }
+        .courses-section {
             padding: 80px 0;
         }
-        .about-content h2 {
-            color: #2c2c2c;
-            margin-bottom: 20px;
-            font-size: 32px;
-        }
-        .about-content p {
-            margin-bottom: 20px;
-            line-height: 1.8;
-            color: #555;
-        }
-        .about-content ul {
-            margin-bottom: 30px;
-            padding-left: 20px;
-        }
-        .about-content ul li {
-            margin-bottom: 10px;
-            color: #555;
-        }
-        .mission-vision {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 30px;
-            margin-bottom: 40px;
-        }
-        .mission, .vision {
-            flex: 1;
-            min-width: 300px;
-            padding: 30px;
-            background: #f9f9f9;
+        .course-card {
+            border: 1px solid #eee;
             border-radius: 5px;
-            box-shadow: 0 3px 10px rgba(0,0,0,0.1);
+            overflow: hidden;
+            margin-bottom: 30px;
+            transition: all 0.3s ease;
         }
-        .mission h3, .vision h3 {
-            color: #007bff;
+        .course-card:hover {
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+            transform: translateY(-5px);
+        }
+        .course-img {
+            height: 200px;
+            overflow: hidden;
+        }
+        .course-img img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: transform 0.5s ease;
+        }
+        .course-card:hover .course-img img {
+            transform: scale(1.05);
+        }
+        .course-content {
+            padding: 20px;
+        }
+        .course-content h3 {
             margin-bottom: 15px;
-            font-size: 24px;
+            color: #2c2c2c;
         }
-        .values-list {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-            gap: 20px;
+        .course-meta {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 15px;
+            color: #666;
+        }
+        .course-meta span {
+            display: flex;
+            align-items: center;
+        }
+        .course-meta i {
+            margin-right: 5px;
+            color: #007bff;
+        }
+        .course-btn {
+            display: inline-block;
+            background: #007bff;
+            color: #fff;
+            padding: 8px 20px;
+            border-radius: 3px;
+            text-decoration: none;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+        .course-btn:hover {
+            background: #0056b3;
+            color: #fff;
+        }
+        .filter-section {
             margin-bottom: 40px;
-        }
-        .value-item {
             padding: 20px;
             background: #f9f9f9;
-            border-left: 4px solid #007bff;
-            border-radius: 3px;
+            border-radius: 5px;
         }
-        .value-item h4 {
+        .filter-section h3 {
+            margin-bottom: 20px;
             color: #2c2c2c;
-            margin-bottom: 10px;
+        }
+        .filter-group {
+            margin-bottom: 15px;
+        }
+        .filter-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: 600;
+        }
+        .filter-group select, 
+        .filter-group input {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 3px;
         }
         .alert {
             padding: 15px;
@@ -176,9 +223,9 @@ if (isset($_SESSION['flash_message'])) {
                                 <nav class="navigation">
                                     <ul class="nav menu">
                                         <li><a href="../index.php">Inicio</a></li>
-                                        <li><a href="publicacoes.php">Eventos <i class="icofont-rounded-down"></i></a>
+                                        <li><a href="eventos.php">Eventos <i class="icofont-rounded-down"></i></a>
                                             <ul class="dropdown">
-                                                <li><a href="publicacoes.html">Publicações e actualizações</a></li>
+                                               <li><a href="publicacoes.php">Eventos <i class="icofont-rounded-down"></i></a>
                                                 <li><a href="estadoCandidatura.php">Verificar estado de candidatura</a></li>
                                             </ul>
                                         </li>
@@ -201,20 +248,20 @@ if (isset($_SESSION['flash_message'])) {
         </div>
     </header>
 
-    <!-- About Banner -->
-    <section class="about-banner">
+    <!-- Courses Banner -->
+    <section class="courses-banner">
         <div class="container">
             <div class="row">
                 <div class="col-12">
-                    <h1>Sobre Nós</h1>
-                    <p>Conheça nossa história, missão e valores</p>
+                    <h1>Nossos Cursos</h1>
+                    <p>Descubra as oportunidades de formação que oferecemos</p>
                 </div>
             </div>
         </div>
     </section>
 
-    <!-- About Section -->
-    <section class="about-section">
+    <!-- Courses Section -->
+    <section class="courses-section">
         <div class="container">
             <?php if (isset($flash_message)): ?>
                 <div class="alert alert-<?= $flash_message['type'] ?>">
@@ -222,49 +269,75 @@ if (isset($_SESSION['flash_message'])) {
                 </div>
             <?php endif; ?>
 
-            <div class="about-content">
-                <div class="row">
-                    <div class="col-12">
-                        <h2>Nossa História</h2>
-                        <p>O Instituto Politécnico 30 De Setembro foi fundado em [ano de fundação] com o objetivo de proporcionar educação técnica e profissional de qualidade, contribuindo para o desenvolvimento do país. Desde então, temos nos dedicado a formar profissionais competentes e cidadãos comprometidos com o progresso da sociedade.</p>
-                        
-                        <h2>Nossos Valores</h2>
-                        <div class="values-list">
-                            <div class="value-item">
-                                <h4>Excelência acadêmica</h4>
-                                <p>Compromisso com o ensino de qualidade e a constante atualização dos conhecimentos.</p>
-                            </div>
-                            <div class="value-item">
-                                <h4>Inovação e criatividade</h4>
-                                <p>Incentivo ao pensamento criativo e à busca por soluções inovadoras.</p>
-                            </div>
-                            <div class="value-item">
-                                <h4>Responsabilidade social</h4>
-                                <p>Comprometimento com o desenvolvimento sustentável e o bem-estar da comunidade.</p>
-                            </div>
-                            <div class="value-item">
-                                <h4>Integridade e ética</h4>
-                                <p>Conduta baseada em princípios éticos e valores morais sólidos.</p>
+            <!-- Filtros de Cursos -->
+            <div class="filter-section">
+                <h3>Filtrar Cursos</h3>
+                <form method="GET" action="cursos.php">
+                    <div class="row">
+                        <div class="col-md-4">
+                            <div class="filter-group">
+                                <label for="nivel">Nível</label>
+                                <select name="nivel" id="nivel" class="form-control">
+                                    <option value="">Todos os níveis</option>
+                                    <option value="básico">Básico</option>
+                                    <option value="intermédio">Intermédio</option>
+                                    <option value="avançado">Avançado</option>
+                                </select>
                             </div>
                         </div>
-                        
-                        <div class="mission-vision">
-                            <div class="mission">
-                                <h3>Missão</h3>
-                                <p>Formar profissionais qualificados e cidadãos responsáveis através do ensino técnico e profissional, promovendo o desenvolvimento pessoal e contribuindo para o progresso da sociedade.</p>
-                            </div>
-                            <div class="vision">
-                                <h3>Visão</h3>
-                                <p>Ser referência nacional em educação politécnica, reconhecido pela qualidade do ensino, pela empregabilidade dos seus graduados e pelo impacto positivo na comunidade.</p>
+                        <div class="col-md-4">
+                            <div class="filter-group">
+                                <label for="duracao">Duração</label>
+                                <select name="duracao" id="duracao" class="form-control">
+                                    <option value="">Todas as durações</option>
+                                    <option value="3 meses">3 meses</option>
+                                    <option value="6 meses">6 meses</option>
+                                    <option value="1 ano">1 ano</option>
+                                    <option value="2 anos">2 anos</option>
+                                </select>
                             </div>
                         </div>
-                        
-                        <h2>Nossa Estrutura</h2>
-                        <p>O Instituto conta com modernas instalações, laboratórios equipados e um corpo docente qualificado, proporcionando aos alunos as melhores condições para o seu desenvolvimento acadêmico e profissional. Nossas salas de aula são projetadas para oferecer conforto e tecnologia, enquanto nossos laboratórios permitem a prática e aplicação dos conhecimentos teóricos.</p>
-                        
-                        <p>Além disso, temos uma biblioteca bem equipada, espaços de convivência para os alunos e áreas esportivas que complementam a formação integral dos nossos estudantes.</p>
+                        <div class="col-md-4">
+                            <div class="filter-group">
+                                <label for="search">Pesquisar</label>
+                                <input type="text" name="search" id="search" placeholder="Nome do curso ou instrutor" class="form-control">
+                            </div>
+                        </div>
                     </div>
-                </div>
+                    <button type="submit" class="btn btn-primary">Filtrar</button>
+                    <a href="cursos.php" class="btn btn-secondary">Limpar filtros</a>
+                </form>
+            </div>
+
+            <!-- Lista de Cursos -->
+            <div class="row">
+                <?php if (empty($cursos)): ?>
+                    <div class="col-12">
+                        <div class="alert alert-info">
+                            Nenhum curso disponível no momento. Por favor, volte mais tarde.
+                        </div>
+                    </div>
+                <?php else: ?>
+                    <?php foreach ($cursos as $curso): ?>
+                        <div class="col-lg-4 col-md-6 col-12">
+                            <div class="course-card">
+                               
+                                <div class="course-content">
+                                    <h3><?= htmlspecialchars($curso['nome']) ?></h3>
+                                    <div class="course-meta">
+                                        <span><i class="fa fa-clock-o"></i> <?= htmlspecialchars($curso['duracao']) ?></span>
+                                        <span><i class="fa fa-level-up"></i> <?= htmlspecialchars($curso['nivel']) ?></span>
+                                    </div>
+                                    <p><?= nl2br(htmlspecialchars(substr($curso['descricao'], 0, 100))) ?>...</p>
+                                    <div class="course-meta">
+                                        <span><i class="fa fa-user"></i> <?= htmlspecialchars($curso['instrutor']) ?></span>
+                                    </div>
+                            
+                                </div>
+                            </div>
+                        </div>
+                    <?php endforeach; ?>
+                <?php endif; ?>
             </div>
         </div>
     </section>

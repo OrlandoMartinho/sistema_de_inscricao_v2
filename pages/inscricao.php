@@ -380,7 +380,7 @@ function processarUpload($field_name, $allowed_types) {
                                     <ul class="nav menu">
                                         <li><a href="../index.php">Inicio</a></li>
                                         <li><a href="eventos.php">Eventos</a></li>
-                                        <li><a href="cursos.php">Cursos</a></li>
+                                       <li><a href="cursos.php">Cursos</a></li>
                                         <li><a href="contactos.php">Contactos</a></li>
                                         <li><a href="sobre.php">Sobre nós</a></li>
                                         <li><a href="admin/login.php">Login</a></li>

@@ -114,7 +114,7 @@
 												</li>
 											</ul>
 										</li>
-										<li><a href="pages/cursoinfor.html">Cursos</a></li>
+										<li><a href="pages/cursos.php">Cursos</a></li>
 										<li><a href="pages/contactos.php">Contactos</a></li>
 										<li><a href="pages/sobre.php">Sobre nós</a></li>
 										<li><a href="pages/admin/login.php">Login</a></li>
