@@ -58,7 +58,8 @@ if (isset($_SESSION['flash_message'])) {
     
     <style>
         .events-banner {
-            background-image: url('../img/events-banner.jpg');
+              background-image: url('../img/ac.jpg');
+           
             background-size: cover;
             background-position: center;
             padding: 150px 0;

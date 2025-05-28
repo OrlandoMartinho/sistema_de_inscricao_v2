@@ -56,7 +56,7 @@ if (isset($_SESSION['flash_message'])) {
     
     <style>
         .courses-banner {
-            background-image: url('../img/courses-banner.jpg');
+            background-image: url('../img/ac.jpg');
             background-size: cover;
             background-position: center;
             padding: 150px 0;
