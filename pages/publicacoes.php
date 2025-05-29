@@ -308,7 +308,7 @@ if (isset($_SESSION['flash_message'])) {
                                         <li><a href="../index.php">Inicio</a></li>
                                         <li><a href="eventos.php">Eventos <i class="icofont-rounded-down"></i></a>
                                             <ul class="dropdown">
-                                                <li><a href="publicacoes.html">Publicações e actualizações</a></li>
+                                                <li><a href="#">Publicações e actualizações</a></li>
                                                 <li><a href="estadoCandidatura.php">Verificar estado de candidatura</a></li>
                                             </ul>
                                         </li>
