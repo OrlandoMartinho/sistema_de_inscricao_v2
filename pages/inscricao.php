@@ -510,6 +510,8 @@ function processarUpload($field_name, $allowed_types) {
                     <div class="col-md-4">
                         <div class="form-group">
                             <label>Comprovativo de pagamento*</label>
+                          
+                            <input type="text" id="rup" name="rup" value="" readonly>  
                             <div class="file-input">
                                 <label class="file-input-label" for="comprovativo">Selecionar arquivo</label>
                                 <input type="file" id="comprovativo" name="comprovativo" required accept="image/jpeg,image/png,application/pdf">
@@ -690,6 +692,37 @@ function processarUpload($field_name, $allowed_types) {
         document.getElementById('telefone').addEventListener('input', function(e) {
             this.value = this.value.replace(/\D/g, '');
         });
+
+        function gerarRUP() {
+            let rupNumeros = '';
+            for (let i = 0; i < 13; i++) {
+                rupNumeros += Math.floor(Math.random() * 10); // Gera um dígito aleatório de 0 a 9
+            }
+
+            // Formata o RUP: xxxx.xxxx.xxxx.x
+            let rupFormatado = '';
+            for (let i = 0; i < rupNumeros.length; i++) {
+                rupFormatado += rupNumeros[i];
+                if ((i + 1) % 4 === 0 && i !== 12) {
+                    rupFormatado += '.';
+                }
+            }
+
+            const inputRup = document.getElementById('rup');
+            if (inputRup) {
+                inputRup.value ="RUP:"+ rupFormatado; // Define o valor do campo RUP formatado
+            } else {
+                console.error("Campo de RUP não encontrado no DOM.");
+            }
+
+            return rupFormatado;
+        }
+
+
+        // Exemplo de uso
+        console.log("RUP gerado:", gerarRUP());
+
+
     </script>
 </body>
 </html>
