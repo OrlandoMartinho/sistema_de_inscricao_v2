@@ -30,9 +30,10 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $sexo = in_array($_POST['sexo'], ['Masculino', 'Feminino']) ? $_POST['sexo'] : null;
     $curso_id = (int)$_POST['curso_id'];
     $curso_nome = null;
+    $data_de_nascimento = htmlspecialchars(trim($_POST['data_de_nascimento']));
     
     // Verificar dados obrigatórios
-    if (empty($nome_completo) || empty($email) || empty($telefone) || empty($bi_numero) || !$sexo || !$curso_id) {
+    if (empty($nome_completo) || empty($email) || empty($telefone) || empty($bi_numero) || !$sexo || !$curso_id || empty($data_de_nascimento)) {
         $_SESSION['error_message'] = "Por favor, preencha todos os campos obrigatórios.";
         header("Location: inscricao.php");
         exit();
@@ -106,12 +107,12 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     }
     $stmt_check->close();
     $stmt = $conn->prepare("INSERT INTO inscricoes 
-    (nome_completo, email, telefone, bi_numero, curso, sexo, curso_id, foto_passe, documento_bi, comprovativo) 
-    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
+    (nome_completo, email, telefone, bi_numero, curso, sexo, curso_id, foto_passe, documento_bi, comprovativo, data_de_nascimento) 
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
 
 // Usar tipos: s = string, i = integer
 // Como os campos de arquivos são NULL, use "s" e passe `null` diretamente
-$stmt->bind_param("ssssssisss", 
+$stmt->bind_param("ssssssissss", 
     $nome_completo, 
     $email, 
     $telefone, 
@@ -121,7 +122,8 @@ $stmt->bind_param("ssssssisss",
     $curso_id,
     $foto_passe,     // null ou string base64 se estiver usando
     $documento_bi,   // idem
-    $comprovativo    // idem
+    $comprovativo ,
+    $data_de_nascimento   // idem
 );
 
     // Bind os parâmetros blob separadamente
@@ -447,6 +449,15 @@ function processarUpload($field_name, $allowed_types) {
                             <div class="error-text" id="telefone_error"></div>
                         </div>
                     </div>
+
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label for="data_de_nascimento">Data de Nascimento*</label>
+                            <input type="date" id="data_de_nascimento" name="data_de_nascimento" required>
+                            <div class="error-text" id="data_de_nascimento_error"></div>
+                        </div>
+                    </div>
+
                     <div class="col-md-6">
                         <div class="form-group">
                             <label for="bi_numero">Número de identificação (BI)*</label>

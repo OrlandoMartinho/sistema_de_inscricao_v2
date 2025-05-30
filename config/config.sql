@@ -49,6 +49,7 @@ CREATE TABLE IF NOT EXISTS inscricoes (
     documento_bi LONGBLOB ,
     comprovativo LONGBLOB ,
     data_inscricao TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    data_nascimento DATE NOT NULL,
     status ENUM('pendente', 'aprovado', 'rejeitado') DEFAULT 'pendente',
     FOREIGN KEY (curso_id) REFERENCES cursos(id)
         ON DELETE CASCADE
