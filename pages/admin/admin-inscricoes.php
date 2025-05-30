@@ -9,7 +9,7 @@ if (!isset($_SESSION['loggedin'])) {
 include('../../config/connection.php');
 
 // Diretório para upload de documentos
-$upload_dir = '../../uploads/inscricoes/';
+$upload_dir = '../../Uploads/inscricoes/';
 
 // Criar diretório se não existir
 if (!file_exists($upload_dir)) {
@@ -27,10 +27,12 @@ while ($row = $cursos_result->fetch_assoc()) {
 // Processar filtros
 $curso_filter = isset($_GET['curso']) ? intval($_GET['curso']) : null;
 $status_filter = isset($_GET['status']) ? $_GET['status'] : null;
+$idade_filter = isset($_GET['idade']) ? $_GET['idade'] : null;
 
 // Construir consulta SQL com filtros
 $sql = "SELECT i.id, i.nome_completo, i.email, i.telefone, i.bi_numero, i.sexo, 
-               i.data_inscricao, i.status, i.observacoes, c.nome as curso_nome
+               i.data_inscricao, i.status, i.observacoes, i.data_de_nascimento, 
+               c.nome as curso_nome
         FROM inscricoes i
         JOIN cursos c ON i.curso_id = c.id
         WHERE 1=1";
@@ -50,7 +52,24 @@ if ($status_filter) {
     $types .= 's';
 }
 
-$sql .= " ORDER BY i.data_inscricao DESC";
+if ($idade_filter) {
+    if ($idade_filter == 'asc') {
+        $sql .= " ORDER BY i.data_de_nascimento DESC"; // Menor para maior (mais jovem para mais velho)
+    } elseif ($idade_filter == 'desc') {
+        $sql .= " ORDER BY i.data_de_nascimento ASC"; // Maior para menor (mais velho para mais jovem)
+    } elseif ($idade_filter == '15') {
+        $sql .= " AND TIMESTAMPDIFF(YEAR, i.data_de_nascimento, CURDATE()) > 15";
+        $sql .= " ORDER BY i.data_inscricao DESC";
+    } elseif ($idade_filter == '17') {
+        $sql .= " AND TIMESTAMPDIFF(YEAR, i.data_de_nascimento, CURDATE()) > 17";
+        $sql .= " ORDER BY i.data_inscricao DESC";
+    } elseif ($idade_filter == '30') {
+        $sql .= " AND TIMESTAMPDIFF(YEAR, i.data_de_nascimento, CURDATE()) > 30";
+        $sql .= " ORDER BY i.data_inscricao DESC";
+    }
+} else {
+    $sql .= " ORDER BY i.data_inscricao DESC";
+}
 
 // Preparar e executar a consulta
 $stmt = $conn->prepare($sql);
@@ -104,11 +123,14 @@ if (isset($_GET['export'])) {
     // Cabeçalho do CSV
     fputcsv($output, [
         'ID', 'Nome', 'Email', 'Telefone', 'BI', 'Sexo', 
-        'Curso', 'Data Inscrição', 'Status', 'Observações'
+        'Curso', 'Data Inscrição', 'Status', 'Observações', 'Data de Nascimento', 'Idade'
     ]);
     
     // Dados
     foreach ($inscricoes as $inscricao) {
+        $idade = !empty($inscricao['data_de_nascimento']) 
+            ? date_diff(date_create($inscricao['data_de_nascimento']), date_create('now'))->y 
+            : 'N/A';
         fputcsv($output, [
             $inscricao['id'],
             $inscricao['nome_completo'],
@@ -119,7 +141,9 @@ if (isset($_GET['export'])) {
             $inscricao['curso_nome'],
             date('d/m/Y H:i', strtotime($inscricao['data_inscricao'])),
             $inscricao['status'],
-            $inscricao['observacoes']
+            $inscricao['observacoes'],
+            isset($inscricao['data_de_nascimento']) ? date('d/m/Y', strtotime($inscricao['data_de_nascimento'])) : '',
+            $idade
         ]);
     }
     
@@ -149,12 +173,12 @@ if (isset($_GET['edit'])) {
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Admin - Inscrições</title>
     <link rel="stylesheet" href="../css/bootstrap.min.css">
-       <link rel="stylesheet" href="../css1/admin/inscricoes/inscricoes.css">
-       <link rel="stylesheet" href="../css1/modaiscss2.css">
+    <link rel="stylesheet" href="../css1/admin/inscricoes/inscricoes.css">
+    <link rel="stylesheet" href="../css1/modaiscss2.css">
     <!-- Bibliotecas para exportação PDF -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.25/jspdf.plugin.autotable.min.js"></script>
-       <!-- Favicon -->
+    <!-- Favicon -->
     <link rel="icon" href="../../img/30 DE SEPTEMBRO.png">
 </head>
 <body>
@@ -231,6 +255,14 @@ if (isset($_GET['edit'])) {
                         <option value="aprovado" <?php echo ($status_filter == 'aprovado') ? 'selected' : ''; ?>>Aprovado</option>
                         <option value="rejeitado" <?php echo ($status_filter == 'rejeitado') ? 'selected' : ''; ?>>Rejeitado</option>
                     </select>
+                    <select name="idade" class="filter-select" onchange="this.form.submit()">
+                        <option value="">Filtrar por idade</option>
+                        <option value="asc" <?php echo ($idade_filter == 'asc') ? 'selected' : ''; ?>>Menor para maior</option>
+                        <option value="desc" <?php echo ($idade_filter == 'desc') ? 'selected' : ''; ?>>Maior para menor</option>
+                        <option value="15" <?php echo ($idade_filter == '15') ? 'selected' : ''; ?>>Superior a 15 anos</option>
+                        <option value="17" <?php echo ($idade_filter == '17') ? 'selected' : ''; ?>>Superior a 17 anos</option>
+                        <option value="30" <?php echo ($idade_filter == '30') ? 'selected' : ''; ?>>Acima de 30 anos</option>
+                    </select>
                 </form>
             </div>
             
@@ -242,6 +274,7 @@ if (isset($_GET['edit'])) {
                             <th>Nome</th>
                             <th>Curso</th>
                             <th>Data</th>
+                            <th>Idade</th>
                             <th>Status</th>
                             <th>Ações</th>
                         </tr>
@@ -254,6 +287,16 @@ if (isset($_GET['edit'])) {
                                     <td><?php echo htmlspecialchars($inscricao['nome_completo']); ?></td>
                                     <td><?php echo htmlspecialchars($inscricao['curso_nome']); ?></td>
                                     <td><?php echo date('d/m/Y', strtotime($inscricao['data_inscricao'])); ?></td>
+                                    <td>
+                                        <?php 
+                                        if (!empty($inscricao['data_de_nascimento'])) {
+                                            $idade = date_diff(date_create($inscricao['data_de_nascimento']), date_create('now'))->y;
+                                            echo $idade . ' anos';
+                                        } else {
+                                            echo 'N/A';
+                                        }
+                                        ?>
+                                    </td>
                                     <td>
                                         <span class="status-badge status-<?php echo $inscricao['status']; ?>">
                                             <?php echo ucfirst($inscricao['status']); ?>
@@ -300,7 +343,7 @@ if (isset($_GET['edit'])) {
                             <?php endforeach; ?>
                         <?php else: ?>
                             <tr>
-                                <td colspan="6" class="text-center py-4">Nenhuma inscrição encontrada</td>
+                                <td colspan="7" class="text-center py-4">Nenhuma inscrição encontrada</td>
                             </tr>
                         <?php endif; ?>
                     </tbody>
@@ -314,7 +357,7 @@ if (isset($_GET['edit'])) {
         <div class="modal-content">
             <div class="modal-header">
                 <h3>Detalhes da Inscrição</h3>
-                <span class="close-btn" onclick="closeModal('viewModal')">&times;</span>
+                <span class="close-btn" onclick="closeModal('viewModal')">×</span>
             </div>
             <div class="modal-body">
                 <div class="inscricao-details">
@@ -375,7 +418,7 @@ if (isset($_GET['edit'])) {
         <div class="modal-content">
             <div class="modal-header">
                 <h3>Editar Inscrição</h3>
-                <span class="close-btn" onclick="closeModal('editModal')">&times;</span>
+                <span class="close-btn" onclick="closeModal('editModal')">×</span>
             </div>
             <form method="post" action="admin-inscricoes.php">
                 <input type="hidden" name="id" id="edit-id">
@@ -413,9 +456,8 @@ if (isset($_GET['edit'])) {
             </form>
         </div>
     </div>
-    <script>
-        
 
+    <script>
         // Funções para manipulação dos modais
         function openViewModal(id, nome, curso, data, status, email, telefone, bi, sexo) {
             document.getElementById('view-id').textContent = id;
@@ -489,12 +531,15 @@ if (isset($_GET['edit'])) {
                 let url = 'admin-inscricoes.php?export=1';
                 
                 const cursoFilter = "<?php echo $curso_filter; ?>";
+                const idadeFilter = "<?php echo $idade_filter; ?>";
                 if (cursoFilter) {
                     url += '&curso=' + cursoFilter;
                 }
-                
                 if (status !== 'all') {
                     url += '&status=' + status;
+                }
+                if (idadeFilter) {
+                    url += '&idade=' + idadeFilter;
                 }
                 
                 window.location.href = url;
@@ -504,7 +549,7 @@ if (isset($_GET['edit'])) {
             }
         }
 
-       function exportToPDF(status) {
+        function exportToPDF(status) {
             const { jsPDF } = window.jspdf;
             const doc = new jsPDF('p', 'pt', 'a4');
 
@@ -529,9 +574,18 @@ if (isset($_GET['edit'])) {
             doc.setTextColor(100);
             doc.setFont('helvetica', 'normal');
 
+            let idadeFilterText = "<?php echo $idade_filter; ?>";
+            if (idadeFilterText === 'asc') idadeFilterText = 'Menor para maior';
+            else if (idadeFilterText === 'desc') idadeFilterText = 'Maior para menor';
+            else if (idadeFilterText === '15') idadeFilterText = 'Superior a 15 anos';
+            else if (idadeFilterText === '17') idadeFilterText = 'Superior a 17 anos';
+            else if (idadeFilterText === '30') idadeFilterText = 'Acima de 30 anos';
+            else idadeFilterText = 'Todos';
+
             let filtros = [
                 `Status: ${status === 'all' ? 'Todos' : status.charAt(0).toUpperCase() + status.slice(1)}`,
                 `Curso: ${"<?php echo $curso_filter ? htmlspecialchars($cursos[$curso_filter]) : 'Todos'; ?>"}`,
+                `Idade: ${idadeFilterText}`,
                 `Emitido em: ${new Date().toLocaleDateString('pt-BR')}`
             ];
 
@@ -549,6 +603,7 @@ if (isset($_GET['edit'])) {
                 { content: 'NOME', styles: { fontStyle: 'bold', fillColor: [13, 110, 253], textColor: 255, cellPadding: 6 } },
                 { content: 'CURSO', styles: { fontStyle: 'bold', fillColor: [13, 110, 253], textColor: 255, cellPadding: 6 } },
                 { content: 'DATA', styles: { fontStyle: 'bold', fillColor: [13, 110, 253], textColor: 255, cellPadding: 6 } },
+                { content: 'IDADE', styles: { fontStyle: 'bold', fillColor: [13, 110, 253], textColor: 255, cellPadding: 6 } },
                 { content: 'STATUS', styles: { fontStyle: 'bold', fillColor: [13, 110, 253], textColor: 255, cellPadding: 6 } }
             ]];
 
@@ -558,7 +613,7 @@ if (isset($_GET['edit'])) {
 
             const data = rows.map(row => {
                 const cells = row.querySelectorAll('td');
-                const rowStatus = cells[4].querySelector('span').textContent.toLowerCase().trim();
+                const rowStatus = cells[5].querySelector('span').textContent.toLowerCase().trim();
 
                 if (status === 'all' || rowStatus === status) {
                     return [
@@ -566,8 +621,9 @@ if (isset($_GET['edit'])) {
                         cells[1].textContent,
                         cells[2].textContent,
                         cells[3].textContent,
+                        cells[4].textContent,
                         {
-                            content: cells[4].textContent.trim(),
+                            content: cells[5].textContent.trim(),
                             styles: {
                                 fontStyle: 'bold',
                                 textColor: rowStatus === 'aprovado' ? [25, 135, 84] :
@@ -587,8 +643,7 @@ if (isset($_GET['edit'])) {
                 startY: tableStartY,
                 theme: 'striped',
                 tableWidth: 'wrap',
-                pagebreak: 'auto',
-
+                pageBreak: 'auto',
                 styles: {
                     fontSize: 10,
                     cellPadding: 5,
@@ -610,12 +665,12 @@ if (isset($_GET['edit'])) {
                     1: { cellWidth: 100, halign: 'left' },
                     2: { cellWidth: 80, halign: 'left' },
                     3: { cellWidth: 60, halign: 'center' },
-                    4: { cellWidth: 50, halign: 'center' }
+                    4: { cellWidth: 50, halign: 'center' },
+                    5: { cellWidth: 50, halign: 'center' }
                 },
                 alternateRowStyles: {
                     fillColor: [248, 249, 250]
                 },
-
                 didDrawPage: function (data) {
                     // Centralizar a tabela dinamicamente
                     const tableWidth = data.table.width;
@@ -657,20 +712,18 @@ if (isset($_GET['edit'])) {
             doc.save(filename);
         }
 
-
-                // Fechar modal ao pressionar ESC
-                document.onkeydown = function(evt) {
-                    evt = evt || window.event;
-                    if (evt.key === "Escape") {
-                        const modals = document.querySelectorAll('.modal');
-                        modals.forEach(modal => {
-                            if (modal.style.display === 'block') {
-                                modal.style.display = 'none';
-                            }
-                        });
+        // Fechar modal ao pressionar ESC
+        document.onkeydown = function(evt) {
+            evt = evt || window.event;
+            if (evt.key === "Escape") {
+                const modals = document.querySelectorAll('.modal');
+                modals.forEach(modal => {
+                    if (modal.style.display === 'block') {
+                        modal.style.display = 'none';
                     }
-                };
-
+                });
+            }
+        };
     </script>
 </body>
 </html>
