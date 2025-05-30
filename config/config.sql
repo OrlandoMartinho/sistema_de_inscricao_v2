@@ -62,6 +62,7 @@ CREATE TABLE  IF NOT EXISTS eventos (
     data_evento DATETIME NOT NULL,
     local VARCHAR(255) NOT NULL,
     descricao TEXT,
+    foto LONGBLOB, 
     imagem VARCHAR(255), -- caminho da imagem ou nome do arquivo salvo
     status ENUM('ativo', 'inativo') NOT NULL DEFAULT 'ativo',
     criado_em TIMESTAMP DEFAULT CURRENT_TIMESTAMP
