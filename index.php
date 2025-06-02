@@ -1,0 +1,609 @@
+<!doctype html>
+<html class="no-js" lang="zxx">
+
+<head>
+	<!-- Meta Tags -->
+	<meta charset="utf-8">
+	<meta http-equiv="X-UA-Compatible" content="IE=edge">
+	<meta name="keywords" content="Site keywords here">
+	<meta name="description" content="">
+	<meta name='copyright' content=''>
+	<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+	<!-- Title -->
+	<title>Instituto politécnico 30 De Setembro</title>
+
+	<!-- Favicon -->
+	<link rel="icon" href="./img/30 DE SEPTEMBRO.png">
+
+
+
+	
+
+	<!--style.css-->
+	<link rel="stylesheet" href="./assets/css/style.css">
+
+	<!--responsive.css-->
+	<link rel="stylesheet" href="./assets/css/responsive.css">
+
+
+
+	
+	<link
+		href="https://fonts.googleapis.com/css?family=Poppins:200i,300,300i,400,400i,500,500i,600,600i,700,700i,800,800i,900,900i&display=swap"
+		rel="stylesheet">
+
+
+	<link rel="stylesheet" href="./css/bootstrap.min.css">
+
+	<link rel="stylesheet" href="./css/nice-select.css">
+
+	<link rel="stylesheet" href="./css/font-awesome.min.css">
+
+	<link rel="stylesheet" href="./css/icofont.css">
+
+	<link rel="stylesheet" href="./css/slicknav.min.css">
+
+	<link rel="stylesheet" href="./css/owl-carousel.css">
+
+	<link rel="stylesheet" href="./css/datepicker.css">
+
+	<link rel="stylesheet" href="./css/animate.min.css">
+
+	<link rel="stylesheet" href="./css/magnific-popup.css">
+
+	<link rel="stylesheet" href="./css/normalize.css">
+	<link rel="stylesheet" href="./style.css">
+	<link rel="stylesheet" href="./css/responsive.css">
+	<link rel="stylesheet" href="./css/formulario.css">
+
+</head>
+
+
+<style>
+
+<style>
+	body {}
+#titulo{
+	color:#fff;
+	
+}
+
+#txt{
+	color:fff;
+}
+.courses-banner {
+            background-image: url('img/ac.jpg');
+            background-size: cover;
+            background-position: center;
+            padding: 150px 0;
+            text-align: center;
+            color: #fff;
+            position: relative;
+        }
+
+        .courses-banner::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.6);
+        }
+        .courses-banner h1 {
+            font-size: 48px;
+            margin-bottom: 20px;
+            position: relative;
+        }
+        .courses-banner p {
+            font-size: 18px;
+            position: relative;
+        }
+</style>
+
+
+</style>
+
+<body>
+
+	<div class="preloader">
+		<div class="loader">
+			<div class="loader-outter"></div>
+			<div class="loader-inner"></div>
+
+			<div class="indicator">
+				<svg width="16px" height="12px">
+					<polyline id="back" points="1 6 4 6 6 11 10 1 12 6 15 6"></polyline>
+					<polyline id="front" points="1 6 4 6 6 11 10 1 12 6 15 6"></polyline>
+				</svg>
+			</div>
+		</div>
+	</div>
+
+	<!--inicio do header-->
+	<header class="header">
+
+		<div class="header-inner">
+			<div class="container">
+				<div class="inner">
+					<div class="row">
+						<div class="col-lg-3 col-md-3 col-12">
+							<!-- logotipo do sistema -->
+							<div class="logo">
+							<img class="img_logo" width="70" src="img/30 de SETEMBRO_120305.png" alt="">
+							</div>
+							<!-- fim logotipo do sistema -->
+							<!-- Inicio da nav bar -->
+							<div class="mobile-nav"></div>
+							<!-- fim da nav bar -->
+						</div>
+						<div class="col-lg-7 col-md-9 col-12">
+							<!--  Menu principal -->
+							<div class="main-menu">
+								<nav class="navigation">
+									<ul class="nav menu">
+										<li><a href="#">Inicio </a></li>
+									
+										</li>
+
+										<li><a href="#">Eventos <i class="icofont-rounded-down"></i></a>
+											<ul class="dropdown">
+												<li><a href="pages/publicacoes.php">Publicações e actualizações</a></li>
+												<li><a href="pages/estadoCandidatura.php">Vereficar estado de candidatura</a>
+												</li>
+											</ul>
+										</li>
+										<li><a href="pages/cursos.php">Cursos</a></li>
+										<li><a href="pages/contactos.php">Contactos</a></li>
+										<li><a href="pages/sobre.php">Sobre nós</a></li>
+										<li><a href="pages/admin/login.php">Login</a></li>
+									</ul>
+								</nav>
+							</div>
+
+						</div>
+						<div class="col-lg-2 col-12">
+							<div class="get-quote">
+								<a href="pages/inscricao.php" class="btn">Inscrição</a>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+
+	</header>
+
+
+	
+	<section class="courses-banner">
+        <div class="container">
+            <div class="row">
+                <div class="col-12">
+                    <h1 id="titulo">INSTITUTO POLITÉCNICO 30 DE SETEMBRO</h1>
+                    <p id="txt">Descubra as oportunidades de formação que oferecemos</p>
+                </div>
+            </div>
+        </div>
+    </section>
+	<br>
+
+	<div class="container">
+
+		<section id="works" class="works">
+			<div class="container">
+				<div class="section-header">
+					<h2>INSTITUTO POLITÉCNICO 30 DE SETEMBRO</h2>
+					<p>SEJA BEM-VINDO </p>
+				</div><!--/.section-header-->
+				<div class="works-content">
+					<div class="row">
+						<div class="col-md-4 col-sm-6">
+							<div class="single-how-works">
+								<div class="single-how-works-icon">
+									<i class=""><img src="assets/img/aluno.png" alt=""></i>
+								</div>
+								<h2><a href="#"> <span>Aluno</span> </a></h2>
+								<p>
+									Não tenha medo de errar,é assim que se aprende seu futuro depende do que você faz hoje
+									não amanhã
+								</p>
+	
+							</div>
+						</div>
+						<div class="col-md-4 col-sm-6">
+							<div class="single-how-works">
+								<div class="single-how-works-icon">
+									<i class=""><img src="assets/img/educacao.png" alt=""></i>
+								</div>
+								<h2><a href="#"> <span>Educação</span></a></h2>
+								<p>
+									A educação transforma sonhos em realidade,educar é semear com sabedoria e colher com
+									paciência
+								</p>
+	
+							</div>
+						</div>
+						<div class="col-md-4 col-sm-6">
+							<div class="single-how-works">
+								<div class="single-how-works-icon">
+									<i class=""><img src="assets/img/professor.png" alt=""></i>
+								</div>
+								<h2><a href="#"> <span>Professores</span> </a></h2>
+								<p>
+									Cada lição que você ensina hoje constrói um futuro melhor amanhã, Professores
+									ensinam com o coração,não apenas a mente
+								</p>
+	
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+	
+
+			<!---momentos-->
+			<section id="explore" class="explore">
+				<div class="container">
+					<div class="section-header">
+						<h2>Momentos</h2>
+						<p>Alguns momentos de alegria partilhados</p>
+					</div><!--/.section-header-->
+					<div class="explore-content">
+						<div class="row">
+							<div class=" col-md-4 col-sm-6">
+								<div class="single-explore-item">
+									<div class="single-explore-img">
+										<img src="assets/images/explore/e1.jpg" alt="explore image">
+										<div class="single-explore-img-info">
+											
+											
+										</div>
+									</div>
+									<div class="single-explore-txt bg-theme-1">
+										<h2><a href="#">30 de setembro</a></h2>
+										<div class="explore-person">
+											<div class="row">
+												<div class="col-sm-10">
+													<p>
+														Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod
+														tempor incid ut labore et dolore magna aliqua....
+													</p>
+												</div>
+											</div>
+										</div>
+										<div class="explore-open-close-part">
+											<div class="row">
+												
+												<div class="col-sm-7">
+													<div class="explore-map-icon">
+														<a href="#"><i data-feather="map-pin"></i></a>
+														<a href="#"><i data-feather="upload"></i></a>
+														<a href="#"><i data-feather="heart"></i></a>
+													</div>
+												</div>
+											</div>
+										</div>
+									</div>
+								</div>
+							</div>
+							<div class="col-md-4 col-sm-6">
+								<div class="single-explore-item">
+									<div class="single-explore-img">
+										<img src="assets/images/explore/e2.jpg" alt="explore image">
+										<div class="single-explore-img-info">
+											
+											
+										</div>
+									</div>
+									<div class="single-explore-txt bg-theme-2">
+										<h2><a href="#">30 de setembro</a></h2>
+										
+										<div class="explore-person">
+											<div class="row">
+												
+												<div class="col-sm-10">
+													<p>
+														Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod
+														tempor incid ut labore et dolore magna aliqua....
+													</p>
+												</div>
+											</div>
+										</div>
+										<div class="explore-open-close-part">
+											<div class="row">
+											
+												<div class="col-sm-7">
+													<div class="explore-map-icon">
+														<a href="#"><i data-feather="map-pin"></i></a>
+														<a href="#"><i data-feather="upload"></i></a>
+														<a href="#"><i data-feather="heart"></i></a>
+													</div>
+												</div>
+											</div>
+										</div>
+									</div>
+								</div>
+							</div>
+						
+							<div class="col-md-4 col-sm-6">
+								<div class="single-explore-item">
+									<div class="single-explore-img">
+										<img src="assets/images/explore/e2.jpg" alt="explore image">
+										<div class="single-explore-img-info">
+											
+											
+										</div>
+									</div>
+									<div class="single-explore-txt bg-theme-2">
+										<h2><a href="#">30 de setembro</a></h2>
+										
+										<div class="explore-person">
+											<div class="row">
+												
+												<div class="col-sm-10">
+													<p>
+														Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod
+														tempor incid ut labore et dolore magna aliqua....
+													</p>
+												</div>
+											</div>
+										</div>
+										<div class="explore-open-close-part">
+											<div class="row">
+											
+												<div class="col-sm-7">
+													<div class="explore-map-icon">
+														<a href="#"><i data-feather="map-pin"></i></a>
+														<a href="#"><i data-feather="upload"></i></a>
+														<a href="#"><i data-feather="heart"></i></a>
+													</div>
+												</div>
+											</div>
+										</div>
+									</div>
+								</div>
+							</div>
+						
+
+							<div class="col-md-4 col-sm-6">
+								<div class="single-explore-item">
+									<div class="single-explore-img">
+										<img src="assets/images/explore/e2.jpg" alt="explore image">
+										<div class="single-explore-img-info">
+											
+											
+										</div>
+									</div>
+									<div class="single-explore-txt bg-theme-2">
+										<h2><a href="#">30 de setembro</a></h2>
+										
+										<div class="explore-person">
+											<div class="row">
+												
+												<div class="col-sm-10">
+													<p>
+														Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod
+														tempor incid ut labore et dolore magna aliqua....
+													</p>
+												</div>
+											</div>
+										</div>
+										<div class="explore-open-close-part">
+											<div class="row">
+											
+												<div class="col-sm-7">
+													<div class="explore-map-icon">
+														<a href="#"><i data-feather="map-pin"></i></a>
+														<a href="#"><i data-feather="upload"></i></a>
+														<a href="#"><i data-feather="heart"></i></a>
+													</div>
+												</div>
+											</div>
+										</div>
+									</div>
+								</div>
+							</div>
+						
+
+
+							<div class="col-md-4 col-sm-6">
+								<div class="single-explore-item">
+									<div class="single-explore-img">
+										<img src="assets/images/explore/e2.jpg" alt="explore image">
+										<div class="single-explore-img-info">
+											
+											
+										</div>
+									</div>
+									<div class="single-explore-txt bg-theme-2">
+										<h2><a href="#">30 de setembro</a></h2>
+										
+										<div class="explore-person">
+											<div class="row">
+												
+												<div class="col-sm-10">
+													<p>
+														Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod
+														tempor incid ut labore et dolore magna aliqua....
+													</p>
+												</div>
+											</div>
+										</div>
+										<div class="explore-open-close-part">
+											<div class="row">
+											
+												<div class="col-sm-7">
+													<div class="explore-map-icon">
+														<a href="#"><i data-feather="map-pin"></i></a>
+														<a href="#"><i data-feather="upload"></i></a>
+														<a href="#"><i data-feather="heart"></i></a>
+													</div>
+												</div>
+											</div>
+										</div>
+									</div>
+								</div>
+							</div>
+								
+							<div class="col-md-4 col-sm-6">
+								<div class="single-explore-item">
+									<div class="single-explore-img">
+										<img src="assets/images/explore/e2.jpg" alt="explore image">
+										<div class="single-explore-img-info">
+											
+											
+										</div>
+									</div>
+									<div class="single-explore-txt bg-theme-2">
+										<h2><a href="#">30 de setembro</a></h2>
+										
+										<div class="explore-person">
+											<div class="row">
+												
+												<div class="col-sm-10">
+													<p>
+														Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod
+														tempor incid ut labore et dolore magna aliqua....
+													</p>
+												</div>
+											</div>
+										</div>
+										<div class="explore-open-close-part">
+											<div class="row">
+											
+												<div class="col-sm-7">
+													<div class="explore-map-icon">
+														<a href="#"><i data-feather="map-pin"></i></a>
+														<a href="#"><i data-feather="upload"></i></a>
+														<a href="#"><i data-feather="heart"></i></a>
+													</div>
+												</div>
+											</div>
+										</div>
+									</div>
+								</div>
+							</div>
+						
+					
+						</div>
+					</div>
+				</div>
+		
+			</section>
+			
+
+	
+
+		<footer id="footer" class="footer ">
+            <!-- Footer Top -->
+            <div class="footer-top">
+                <div class="container">
+                    <div class="row">
+                        <div class="col-lg-3 col-md-6 col-12">
+                        
+                                <div class="single-footer">
+                                    <h2>Instituto politécnico 30 De Setembro</h2>
+                                    <p>Lorem ipsum dolor sit am consectetur adipisicing elit do eiusmod tempor incididunt ut labore dolore magna.</p>
+                                    <!-- Social -->
+                                    <ul class="social">
+                                        <li><a href="#"><i class="icofont-facebook"></i></a></li>
+                                        <li><a href="#"><i class="icofont-google-plus"></i></a></li>
+                                        <li><a href="#"><i class="icofont-twitter"></i></a></li>
+                                        <li><a href="#"><i class="icofont-vimeo"></i></a></li>
+                                        <li><a href="#"><i class="icofont-pinterest"></i></a></li>
+                                    </ul>
+                                    <!-- End Social -->
+                                </div>
+                            </div>
+                            <div class="col-lg-3 col-md-6 col-12">
+                                <div class="single-footer f-link">
+                                    <h2>Links</h2>
+                                    <div class="row">
+                                        <div class="col-lg-6 col-md-6 col-12">
+                                            <ul>
+                                                <li><a href="#"><i class="fa fa-caret-right" aria-hidden="true"></i>Inicio</a></li>
+                                                <li><a href="#"><i class="fa fa-caret-right" aria-hidden="true"></i>Eventos</a></li>
+                                                <li><a href="#"><i class="fa fa-caret-right" aria-hidden="true"></i>Cursos</a></li>
+                                                <li><a href="#"><i class="fa fa-caret-right" aria-hidden="true"></i>Contactos</a></li>
+                                                <li><a href="#"><i class="fa fa-caret-right" aria-hidden="true"></i>Ajuda</a></li>	
+                                            </ul>
+                                        </div>
+                                    </div>
+                                </div>
+                        </div>
+                        <div class="col-lg-3 col-md-6 col-12">
+                            <div class="single-footer">
+                                <h2>Endereço</h2>
+                                <p>Estamos localizados no benfica Via expresse</p>
+                                <ul class="time-sidual">
+                                    <li class="day">Telefone:<span>9999999</span></li>
+                                    <li class="day">Email: <span><a href="">30desetembro@gmail.com</a></span></li>
+                                    <li class="day">Monday - Thusday <span>9.00-15.00</span></li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <!--/ End Footer Top -->
+            <!-- Copyright -->
+            <div class="copyright">
+                <div class="container">
+                    <div class="row">
+                        <div class="col-lg-12 col-md-12 col-12">
+                            <div class="copyright-content">
+                                <p>Instituto politécnico 30 de setembro <a href="https://www.wpthemesgrid.com"
+                                        target="_blank">30desetembro.com</a> </p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+        </footer>
+       
+	
+        <script src="./js/jquery.min.js"></script>
+		<!-- jquery Migrate JS -->
+		<script src="./js/jquery-migrate-3.0.0.js"></script>
+		<!-- jquery Ui JS -->
+		<script src="./js/jquery-ui.min.js"></script>
+		<!-- Easing JS -->
+        <script src="./js/easing.js"></script>
+		<!-- Color JS -->
+		<script src="./js/colors.js"></script>
+		<!-- Popper JS -->
+		<script src="./js/popper.min.js"></script>
+		<!-- Bootstrap Datepicker JS -->
+		<script src="./js/bootstrap-datepicker.js"></script>
+		<!-- Jquery Nav JS -->
+        <script src="./js/jquery.nav.js"></script>
+		<!-- Slicknav JS -->
+		<script src="./js/slicknav.min.js"></script>
+		<!-- ScrollUp JS -->
+        <script src="./js/jquery.scrollUp.min.js"></script>
+		<!-- Niceselect JS -->
+		<script src="./js/niceselect.js"></script>
+		<!-- Tilt Jquery JS -->
+		<script src="./js/tilt.jquery.min.js"></script>
+		<!-- Owl Carousel JS -->
+        <script src="./js/owl-carousel.js"></script>
+		<!-- counterup JS -->
+		<script src="./js/jquery.counterup.min.js"></script>
+		<!-- Steller JS -->
+		<script src="./js/steller.js"></script>
+		<!-- Wow JS -->
+		<script src="./js/wow.min.js"></script>
+		<!-- Magnific Popup JS -->
+		<script src="./js/jquery.magnific-popup.min.js"></script>
+		<!-- Counter Up CDN JS -->
+		<script src="http://cdnjs.cloudflare.com/ajax/libs/waypoints/2.0.3/waypoints.min.js"></script>
+		<!-- Bootstrap JS -->
+		<script src="./js/bootstrap.min.js"></script>
+		<!-- Main JS -->
+		<script src="./js/main.js"></script>
+    </body>
+</html>
+		
